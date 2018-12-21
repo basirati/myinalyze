@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body id="page-top">
+	<div style="width: 100%; display: table;">
+		<div style="display: table-row; background: #7CC1AC;">
+			<div style="display: table-cell;">
+				<label>Number of Requirements:</label><label>450</label><br>
+			</div>
+			<div style="display: table-cell;">
+				<label>Dependency Type</label><br>
+				<input type="checkbox" name="Constrains" value="constrains" checked>Constrains<br>
+				<input type="checkbox" name="Contradicts" value="contradicts">Contradicts<br>
+			</div>
+			<div style="display: table-cell;">
+				<label>Visualization Type</label>
+				<select>
+					<option value="table">Table</option>
+					<option value="cluster">Cluster</option>
+					<option value="individual">Individual</option>
+				</select>
+			</div>
+		</div>
+
+		<div style="display: table-row; background: #7CC1AC;">
+			<div style="display: table-cell;">
+				<label>Most Dependent:</label><label>bla bla bla</label><br>
+				<label>Most Depending:</label><label>bla bla bla</label><br>
+			</div>
+			<div style="display: table-cell;">
+				<label>Most Independent:</label><label>bla bla bla</label><br>
+				<label>Least Influential:</label><label>bla bla bla</label><br>
+			</div>
+			<div style="display: table-cell;">
+				<label>Search:</label>
+				<input type="text" name="search_key">
+			</div>
+		</div>
+	</div>
+
+	<div id="myProgress" style="width: 100%; background-color: #ddd;">
+		<div id="myBar" style="width: 1%; height: 30px; background-color: #4CAF50;">mydata</div>
+	</div>
+
+	<div>
+		<button id="checkbtn">start</button>
+	</div>
+
+	<p id="test">{{content}}</p>
+	{% if deps %}
+	<ul>
+		{% for d in deps %}
+		<li>{{ d }}</li>
+		{% endfor %}
+	</ul>
+	{% else %}
+	<p>NO REQS ARE AVAILABLE.</p>
+	{% endif %}
+
+	{% if reqs %}
+	<ul>
+		{% for r in reqs %}
+		<li>{{ r }} -- in: {{r.indeg}} - out: {{r.outdeg}}</li>
+		{% endfor %}
+	</ul>
+	{% else %}
+	<p>NO REQS ARE AVAILABLE.</p>
+	{% endif %}
+
+	<script src="{% static "riaapp/vendor/jquery/jquery.min.js" %}"></script>
+
+	{% block javascript %}
+	<script>
+	</script>
+	{% endblock %}
+</body>
+</html>

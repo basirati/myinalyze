@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body id="page-top">
+	First Requirement: <input type="text" id="req1" value="The systems must be able to find the best match for the student."><br>
+	Second Requirement: <input type="text" id="req2" value="The student must be able to search for courses."><br>
+	<button type="button" id="like">Click Me!</button>
+	<button type="button" id="run">Run!</button>
+	<p id="l_num">0</p>
+	<div id="myProgress" style="width: 100%; background-color: #ddd;">
+		<div id="myBar" style="width: 1%; height: 30px; background-color: #4CAF50;"></div>
+	</div>
+	<script src="{% static "riaapp/vendor/jquery/jquery.min.js" %}"></script>
+
+	{% block javascript %}
+	<script>
+		$('#run').click(function(){
+			alert("asdasd")
+			var elem = document.getElementById("myBar");   
+			var width = 1;
+			var id = setInterval(frame, 100);
+			s = ""
+			function frame() {
+				s = s + "a"
+				$('#myBar').html(s);
+				//if (width >= 100) {
+				//	clearInterval(id);
+				//} else {
+				//	width++; 
+				//	elem.style.width = width + '%'; 
+				//}
+			}
+		});
+
+		$('#like').click(function(){
+			var num;
+			req1 = $('#req1').val();
+			req2 = $('#req2').val();
+			$.get('/riaapp/like/', {req1data: req1, req2data: req2}, function(data){
+				$('#l_num').html(data);
+			});
+		});
+	</script>
+	{% endblock %}
+</body>
+</html>

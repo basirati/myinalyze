@@ -49,6 +49,8 @@
 	</div>
 
 	<p id="test">{{content}}</p>
+	<p >most ingoing degree {{rgraph.max_indeg_value}}: {{rgraph.max_indeg}}</p>
+	<p >least ingoing degree {{rgraph.min_indeg_value}}: {{rgraph.min_indeg}}</p>
 	{% if deps %}
 	<ul>
 		{% for d in deps %}

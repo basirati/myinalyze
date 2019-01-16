@@ -33,7 +33,6 @@ def loadReqs(doc):
 
 
 def loadInterDeps(dep_type):
-    counter = 0
     cid = ConstrainsIdentifier.ConstrainsIdentifier()
     for r1 in Req.objects.all():
         req1 = cid.parseReq(r1.text)
@@ -42,11 +41,9 @@ def loadInterDeps(dep_type):
                 continue
             req2 = cid.parseReq(r2.text)
             if cid.identify(req1, req2):
-                counter = counter + 1
                 new_idep = IntDep(typ =dep_type, fro = r1, to = r2)
                 new_idep.save()
-            if counter > 1:
-                break
+
 
 def loadfile(request):
     content = "Successfull"
@@ -70,9 +67,10 @@ def analyze(request):
     
     loadInterDeps(constrains_type)
 
-    Graph_Analysis.calculateNodeDegrees()
+    rgraph = Graph_Analysis.ReqGraph()
+    rgraph = Graph_Analysis.calculateNodeDegrees(rgraph)
     
-    response = {'reqs': Req.objects.all(), 'deps': IntDep.objects.all()}
+    response = {'reqs': Req.objects.all(), 'deps': IntDep.objects.all(), 'rgraph': rgraph}
     return render(request, 'riaapp/results.html', response)
 
 

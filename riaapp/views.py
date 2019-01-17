@@ -4,6 +4,8 @@ from django.template import loader
 from django.urls import reverse
 from django.views import generic
 
+from django.http import JsonResponse
+
 from .models import Req, IntDep, IntDepType
 from .forms import DocumentForm
 from .modules.ml_modules import OverlapLib, ConstrainsIdentifier
@@ -69,36 +71,27 @@ def analyze(request):
 
     rgraph = Graph_Analysis.ReqGraph()
     rgraph = Graph_Analysis.calculateNodeDegrees(rgraph)
-    
-    response = {'reqs': Req.objects.all(), 'deps': IntDep.objects.all(), 'rgraph': rgraph}
-    return render(request, 'riaapp/results.html', response)
+    sortedReqs = Req.objects.all().order_by('-indeg')
+
+    response = {'req_count': Req.objects.all().count(), 'max_dependent': rgraph.max_indeg[0].text, 'sortedReqs': sortedReqs}
+    return render(request, 'riaapp/resadmin.html', response)
 
 
 ####################################################################
 
 def resadmin(request):
-    content = "Upload Successfull!"
-    if request.method == 'POST':
-        Req.objects.all().delete()
-        form = DocumentForm(request.POST, request.FILES)
-        if form.is_valid():
-            doc = request.FILES['reqs_file']
-            for line in doc:
-                line_txt = line.decode("utf-8")
-                if hasVerb(line_txt):
-                    new_req = Req(text = line_txt)
-                    new_req.save()
-    else:
-        content = "Upload Failed!"
-
-    response = {'content': content, 'reqs': Req.objects.all()}
+    response = {'content': 'ok', 'reqs': Req.objects.all()}
     return render(request, 'riaapp/resadmin.html', response)
 
 
-def like(request):
-    likes = 0
+def getReqs(request):
+    rs = []
+    ds = []
     if request.method == 'GET':
-        req1 = request.GET['req1data']
-        req2 = request.GET['req2data']
-    x = OverlapLib.getOverlap(req1, req2)
-    return HttpResponse(str(x))
+        for r in Req.objects.all():
+            rs.append(r.text)
+        for d in IntDep.objects.all():
+            tmp = {'source': d.fro.text, 'destination': d.to.text}
+            ds.append(tmp)
+    res = {'jreqs': rs, 'jdeps': ds}
+    return JsonResponse(res)

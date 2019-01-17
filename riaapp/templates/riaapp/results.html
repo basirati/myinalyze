@@ -40,10 +40,6 @@
 		</div>
 	</div>
 
-	<div id="myProgress" style="width: 100%; background-color: #ddd;">
-		<div id="myBar" style="width: 1%; height: 30px; background-color: #4CAF50;">mydata</div>
-	</div>
-
 	<div>
 		<button id="checkbtn">start</button>
 	</div>
@@ -51,6 +47,7 @@
 	<p id="test">{{content}}</p>
 	<p >most ingoing degree {{rgraph.max_indeg_value}}: {{rgraph.max_indeg}}</p>
 	<p >least ingoing degree {{rgraph.min_indeg_value}}: {{rgraph.min_indeg}}</p>
+	
 	{% if deps %}
 	<ul>
 		{% for d in deps %}
@@ -62,9 +59,9 @@
 	{% endif %}
 
 	{% if reqs %}
-	<ul>
+	<ul id='myreqs' style="display: none;">
 		{% for r in reqs %}
-		<li>{{ r }} -- in: {{r.indeg}} - out: {{r.outdeg}}</li>
+		<li>{{ r }}</li>
 		{% endfor %}
 	</ul>
 	{% else %}
@@ -75,6 +72,40 @@
 
 	{% block javascript %}
 	<script>
+		function makeNodes() {
+			var lis = document.getElementById("myreqs").getElementsByTagName("li");
+			var nodes=[];
+			for (var i = 0; i < lis.length; i++) {
+				nodes.push(lis[i].innerHTML);
+			}
+			return nodes;
+		}
+		
+		$('#checkbtn').click(function() {
+			$.get('/riaapp/getreqs/', {}, function(data){
+				nodes = [];
+      			for (var i = 0; i < data.jreqs.length; i++) {
+        			nodes.push({name: data.jreqs[i], id: i+1});
+      			}
+      			links = [];
+      			for (var i = 0; i < data.jdeps.length; i++) {
+        			s = data.jdeps[i].source;
+        			d = data.jdeps[i].destination;
+        			si = -1; di = -1;
+        			for (var j = 0; j < nodes.length; j++) {
+          				if (nodes[j].name == s)
+          					si = nodes[j].id
+          				if (nodes[j].name == d)
+          					di = nodes[j].id
+          				if (si > -1 && di > -1)
+          					break;
+          			}
+          			links.push({source: si, target: di, type: "constrains"});
+        		}
+        		console.log(nodes);
+        		console.log(links);
+			});
+		});
 	</script>
 	{% endblock %}
 </body>

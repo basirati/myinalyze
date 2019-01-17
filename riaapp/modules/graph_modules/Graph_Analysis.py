@@ -74,3 +74,26 @@ def getDepsIn(r):
         if d.to == r:
             res.append(d)
     return res
+
+
+def calNodeOutDegree(r):
+    res = 0
+    deplist = [r]
+    countedlist = []
+    while deplist:
+        rx = deplist.pop()
+        if (rx in countedlist):
+            continue
+        countedlist.append(rx)
+        for d in getDepsOut(rx):
+            if not(d.to in countedlist) and not(d.to in deplist):
+                deplist.append(d.to)
+                res = res + 1
+    return res
+
+def getDepsOut(r):
+    res = []
+    for d in IntDep.objects.all():
+        if d.fro == r:
+            res.append(d)
+    return res

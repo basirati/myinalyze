@@ -73,6 +73,7 @@
       </div>
     </div>
   </nav>
+
   <!-- Main content -->
   <div class="main-content">
     <!-- Top navbar -->
@@ -114,8 +115,8 @@
         </div>
       </div>
     </nav>
-    <!-- Header -->
-    <div class="header bg-gradient-primary pb-8 pt-5 pt-md-8">
+    <!-- Header  pb-8 pt-5 pt-md-8-->
+    <div class="header bg-gradient-primary pb-2 pt-md-8">
       <div class="container-fluid">
         <div class="header-body">
           <!-- Card stats -->
@@ -141,7 +142,6 @@
                       <span class="h5 font-weight-bold mb-0">{{max_dependent}}</span>
                     </div>
                   </div>
-
                 </div>
               </div>
             </div>
@@ -151,7 +151,7 @@
                   <div class="row">
                     <div class="col">
                       <h5 class="card-title text-uppercase text-muted mb-0">Most Influential</h5>
-                      <span class="h5 font-weight-bold mb-0">.</span>
+                      <span class="h5 font-weight-bold mb-0">{{max_influential}}</span>
                     </div>
                   </div>
                 </div>
@@ -174,7 +174,53 @@
       </div>
     </div>
     <!-- Page content -->
-    <div class="container-fluid mt--7">
+    <!-- LIST -->
+    <div class="container-fluid pb-5">
+    <div class="row">
+    <div class="row mt-5">
+        <div class="col-xl-12 mb-5 mb-xl-0">
+          <div class="card shadow">
+            <div class="card-header border-0">
+              <div class="row align-items-center">
+                <div class="col">
+                  <h3 class="mb-0">Requirements</h3>
+                </div>
+                <div class="col text-right">
+                  <a href="#!" class="btn btn-sm btn-primary">See all</a>
+                </div>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <!-- Projects table -->
+              <table class="table align-items-center table-flush">
+                <thead class="thead-light">
+                  <tr>
+                    <th scope="col">Requirement Specification</th>
+                    <th scope="col">Dependency Degree</th>
+                    <!--<th scope="col">Influence Degree</th>-->
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for r in sortedReqs %}
+                    <tr>
+                      <th scope="row">
+                        {{r.text}}
+                      </th>
+                      <td>
+                        {{r.indeg}}
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+      </div>
+    <!-- mt--7 -->
+    <div class="container-fluid">
       <div class="row">
         <div class="col-xl-12 mb-5 mb-xl-0">
           <div class="card bg-gradient-default shadow">
@@ -215,82 +261,19 @@
             </div>
           </div>
         </div>
+      </div>
 
-      </div>
-      <div class="row mt-5">
-        <div class="col-xl-8 mb-5 mb-xl-0">
-          <div class="card shadow">
-            <div class="card-header border-0">
-              <div class="row align-items-center">
-                <div class="col">
-                  <h3 class="mb-0">Requirements</h3>
-                </div>
-                <div class="col text-right">
-                  <a href="#!" class="btn btn-sm btn-primary">See all</a>
-                </div>
-              </div>
-            </div>
-            <div class="table-responsive">
-              <!-- Projects table -->
-              <table class="table align-items-center table-flush">
-                <thead class="thead-light">
-                  <tr>
-                    <th scope="col">Requirement</th>
-                    <th scope="col">Ingoing</th>
-                    <th scope="col">Outgoing</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for r in sortedReqs %}
-                    <tr>
-                      <th scope="row">
-                        {{r.text}}
-                      </th>
-                      <td>
-                        {{r.indeg}}
-                      </td>
-                      <td>
-                        {{r.outdeg}}
-                      </td>
-                    </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-        <div class="col-xl-4">
-          <div class="card shadow">
-            <div class="card-header border-0">
-              <div class="row align-items-center">
-                <div class="col">
-                  <h3 class="mb-0">.....</h3>
-                </div>
-                <div class="col text-right">
-                  <a href="#!" class="btn btn-sm btn-primary">See all</a>
-                </div>
-              </div>
-            </div>
-            <div class="table-responsive">
-              <!-- Projects table -->
-              <table class="table align-items-center table-flush">
-                <thead class="thead-light">
-                  <tr>
-                    <th scope="col">TBA</th>
-                    <th scope="col">TBA</th>
-                    <th scope="col"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
+      
       <!-- Footer -->
       <footer class="footer">
-    </footer>
+      <ul>
+        {% for n in longest_path %}
+        <li>
+          {{ n }}
+        </li>
+        {% endfor %}
+      </ul>
+      </footer>
   </div>
 </div>
 <!-- Argon Scripts -->
@@ -316,6 +299,7 @@
 <script type="text/javascript">
   $('#graphbtn').click(function() {
     $('#presentation_type').html("Disjoint Graph Presentation");
+    d3.select("svg").selectAll("*").remove();
     $.get('/riaapp/getreqs/', {}, function(data){
       nodes = [];
       for (var i = 0; i < data.jreqs.length; i++) {
@@ -339,14 +323,18 @@
       all = {};
       all["nodes"] = nodes;
       all["links"] = links;
-      drawDJGraph(all, d3.select("svg"));  
+      drawDJGraph(all, d3.select("svg"));
     });
   });
   
   $('#pathbtn').click(function() {
     $('#presentation_type').html("Path Presentation");
-    d3.select("svg").selectAll("*").remove();
+    $.get('/riaapp/getlp/', {}, function(data){
+      
+      
+    });
   });
+
   $('#rankbtn').click(function() {
     $('#presentation_type').html("Ranking Table Presentation");
     d3.select("svg").selectAll("*").remove();

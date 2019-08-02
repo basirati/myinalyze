@@ -1,4 +1,4 @@
-from ...models import Req, IntDep, IntDepType
+from ...models import Req, Dep, DepType
 
 class ReqGraph(object):
     def __init__(self):
@@ -28,29 +28,59 @@ class ReqGraph(object):
 
 
 def calculateNodeDegrees(rgraph):
-    max_val = 0
-    min_val = 9999
-    maxs = []
-    mins = []
+    max_val_in = 0
+    min_val_in = 9999
+    maxs_in = []
+    mins_in = []
+    max_val_out = 0
+    min_val_out = 9999
+    maxs_out = []
+    mins_out = []
     for r in Req.objects.all():
-        val = calNodeInDegree(r)
-        if val == max_val:
-            maxs.append(r)
-        elif val > max_val:
-            maxs.clear()
-            maxs.append(r)
-            max_val = val
+        val_in = calNodeInDegree(r)
+        val_out = calNodeOutDegree(r)
+        #in degree max caclculation
+        if val_in == max_val_in:
+            maxs_in.append(r)
+        elif val_in > max_val_in:
+            maxs_in.clear()
+            maxs_in.append(r)
+            max_val_in = val_in
 
-        if val == min_val:
-            mins.append(r)
-        elif val < min_val:
-            mins.clear()
-            mins.append(r)
-            min_val = val
-        r.indeg = val
+        #out degree max caclculation
+        if val_out == max_val_out:
+            maxs_out.append(r)
+        elif val_out > max_val_out:
+            maxs_out.clear()
+            maxs_out.append(r)
+            max_val_out = val_out
+
+
+        #in degree min caclculation
+        if val_in == min_val_in:
+            mins_in.append(r)
+        elif val_in < min_val_in:
+            mins_in.clear()
+            mins_in.append(r)
+            min_val_in = val_in
+
+        #out degree min caclculation
+        if val_out == min_val_out:
+            mins_out.append(r)
+        elif val_out < min_val_out:
+            mins_out.clear()
+            mins_out.append(r)
+            min_val_out = val_out
+
+
+        r.indeg = val_in
+        r.outdeg = val_out
         r.save()
-    rgraph.setMinInDeg(mins)
-    rgraph.setMaxInDeg(maxs)
+
+    rgraph.setMinInDeg(mins_in)
+    rgraph.setMaxInDeg(maxs_in)
+    rgraph.setMinOutDeg(mins_out)
+    rgraph.setMaxOutDeg(maxs_out)
     return rgraph
 
 def calNodeInDegree(r):
@@ -63,15 +93,15 @@ def calNodeInDegree(r):
             continue
         countedlist.append(rx)
         for d in getDepsIn(rx):
-            if not(d.fro in countedlist) and not(d.fro in deplist):
-                deplist.append(d.fro)
+            if not(d.source in countedlist) and not(d.source in deplist):
+                deplist.append(d.source)
                 res = res + 1
     return res
 
 def getDepsIn(r):
     res = []
-    for d in IntDep.objects.all():
-        if d.to == r:
+    for d in Dep.objects.all():
+        if d.destination == r:
             res.append(d)
     return res
 
@@ -86,14 +116,14 @@ def calNodeOutDegree(r):
             continue
         countedlist.append(rx)
         for d in getDepsOut(rx):
-            if not(d.to in countedlist) and not(d.to in deplist):
-                deplist.append(d.to)
+            if not(d.destination in countedlist) and not(d.destination in deplist):
+                deplist.append(d.destination)
                 res = res + 1
     return res
 
 def getDepsOut(r):
     res = []
-    for d in IntDep.objects.all():
-        if d.fro == r:
+    for d in Dep.objects.all():
+        if d.source == r:
             res.append(d)
     return res

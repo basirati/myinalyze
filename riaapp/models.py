@@ -7,16 +7,25 @@ class Req(models.Model):
     def __str__(self):
         return self.text
 
-class IntDepType(models.Model):
+class DepType(models.Model):
 	name = models.CharField(max_length=100)
 	directional = models.BooleanField(default=True)
 	def __str__(self):
 		return self.name
 
 
-class IntDep(models.Model):
-	typ = models.ForeignKey(IntDepType, related_name='deptype', on_delete=models.CASCADE)
-	fro = models.ForeignKey(Req, related_name='reqfrom', on_delete=models.CASCADE)
-	to = models.ForeignKey(Req, related_name='reqto', on_delete=models.CASCADE)
+class Dep(models.Model):
+	dep_type = models.ForeignKey(DepType, related_name='+', on_delete=models.CASCADE)
+	source = models.ForeignKey(Req, related_name='+', on_delete=models.CASCADE)
+	destination = models.ForeignKey(Req, related_name='+', on_delete=models.CASCADE)
+	strength = models.IntegerField(default = 1)
+	indirect = models.BooleanField(default= False)
 	def __str__(self):
-		return "{" + self.typ.name + "} : from [" + self.fro.text + "] to [" + self.to.text + "]"
+		return "{" + self.typ.name + "} : from [" + self.source.text + "] to [" + self.dest.text + "]"
+
+
+class Path(models.Model):
+	name = models.CharField(max_length=100)
+	deps = models.ManyToManyField(Dep, related_name='+')
+	def __str__(self):
+		return self.name

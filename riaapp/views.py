@@ -6,10 +6,10 @@ from django.views import generic
 
 from django.http import JsonResponse
 
-from .models import Req, IntDep, IntDepType
+from .models import Req, Dep, DepType
 from .forms import DocumentForm
 from .modules.ml_modules import OverlapLib, ConstrainsIdentifier
-from .modules.graph_modules import Graph_Analysis 
+from .modules.graph_modules import Graph_Analysis, REI_Graph_PathAnylsis
 
 class IndexView(generic.ListView):
     template_name = 'riaapp/index.html'
@@ -34,17 +34,17 @@ def loadReqs(doc):
             new_req.save()
 
 
-def loadInterDeps(dep_type):
-    cid = ConstrainsIdentifier.ConstrainsIdentifier()
+def loadDeps(dep_type):
+    c_id = ConstrainsIdentifier.ConstrainsIdentifier()
     for r1 in Req.objects.all():
-        req1 = cid.parseReq(r1.text)
+        req1 = c_id.parseReq(r1.text)
         for r2 in Req.objects.all():
             if r1 == r2:
                 continue
-            req2 = cid.parseReq(r2.text)
-            if cid.identify(req1, req2):
-                new_idep = IntDep(typ =dep_type, fro = r1, to = r2)
-                new_idep.save()
+            req2 = c_id.parseReq(r2.text)
+            if c_id.identify(req1, req2):
+                new_dep = Dep(dep_type =dep_type, source = r1, destination = r2)
+                new_dep.save()
 
 
 def loadfile(request):
@@ -61,19 +61,23 @@ def loadfile(request):
     return render(request, 'riaapp/index.html', response)
 
 def analyze(request):
-    IntDepType.objects.all().delete()
-    IntDep.objects.all().delete()
+    DepType.objects.all().delete()
+    Dep.objects.all().delete()
     
-    constrains_type = IntDepType(name="constrains")
+    constrains_type = DepType(name="constrains")
     constrains_type.save()
     
-    loadInterDeps(constrains_type)
+    loadDeps(constrains_type)
 
     rgraph = Graph_Analysis.ReqGraph()
     rgraph = Graph_Analysis.calculateNodeDegrees(rgraph)
     sortedReqs = Req.objects.all().order_by('-indeg')
 
-    response = {'req_count': Req.objects.all().count(), 'max_dependent': rgraph.max_indeg[0].text, 'sortedReqs': sortedReqs}
+    mainG = REI_Graph_PathAnylsis.importReqsToGraph()
+    dag = REI_Graph_PathAnylsis.transformToDAG(mainG)
+    longest_path = REI_Graph_PathAnylsis.getLongestPath(dag)
+
+    response = {'req_count': Req.objects.all().count(), 'max_dependent': rgraph.max_indeg[0].text, 'max_influential': sortedReqs.reverse()[0], 'sortedReqs': sortedReqs, 'longest_path': longest_path}
     return render(request, 'riaapp/resadmin.html', response)
 
 
@@ -90,8 +94,17 @@ def getReqs(request):
     if request.method == 'GET':
         for r in Req.objects.all():
             rs.append(r.text)
-        for d in IntDep.objects.all():
-            tmp = {'source': d.fro.text, 'destination': d.to.text}
+        for d in Dep.objects.all():
+            tmp = {'source': d.source.text, 'destination': d.destination.text}
             ds.append(tmp)
     res = {'jreqs': rs, 'jdeps': ds}
     return JsonResponse(res)
+
+def getLP(request):
+    mainG = REI_Graph_PathAnylsis.importReqsToGraph()
+    dag = REI_Graph_PathAnylsis.transformToDAG(mainG)
+    longest_path = REI_Graph_PathAnylsis.getLongestPath(dag)
+    print(longest_path)
+    res = {'path': longest_path}
+    return JsonResponse(res)
+

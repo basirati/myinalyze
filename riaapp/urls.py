@@ -8,5 +8,6 @@ urlpatterns = [
     path('loadfile/analyze/', views.analyze, name='analyze'),
     path('resadmin/', views.resadmin, name='resadmin'),
     re_path(r'^getreqs/$', views.getReqs, name='getreqs'),
+    re_path(r'^getlp/$', views.getLP, name='getlp'),
     re_path(r'^loadfile/$', views.loadfile, name='loadfile'),
 ]

@@ -26,11 +26,11 @@ function drawDJGraph(graph, svg) {
 	.force("charge", d3.forceManyBody())
 	.force("center", d3.forceCenter(width / 2, height / 2));
 
-	update(graph.links, graph.nodes, svg);
+	updateDJGraph(graph.links, graph.nodes, svg);
 	$("line").css({"stroke": "999", "stroke-opacity": ".6", "stroke-width": "1px"});
 }
 
-function update(links, nodes, svg) {
+function updateDJGraph(links, nodes, svg) {
 	link = svg.selectAll(".link")
 	.data(links)
 	.enter()

@@ -45,14 +45,14 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="reqslist">
+            <a class="nav-link" href="">
               <i class="ni ni-pin-3 text-orange"></i> Requirements
             </a>
           </li>
         </ul>
         <!-- Divider -->
         <hr class="my-3">
-        <h6 class="navbar-heading text-muted">.</h6>
+        <h6 class="navbar-heading text-muted">Tools</h6>
         <ul class="navbar-nav mb-md-3">
           <li class="nav-item">
             <a class="nav-link" href="">
@@ -82,7 +82,7 @@
         <div class="row">
           <!-- Form -->
           <span class="col-sm" style="color: white">Search Requirement</span>
-          <form class="navbar-search navbar-search-dark">
+          <form id="search_form" class="navbar-search navbar-search-dark">
             <div class="form-group mb-0">
               <div class="input-group input-group-alternative">
                 <div class="input-group-prepend">
@@ -111,71 +111,27 @@
         </div>
       </div>
     </nav>
-    <!-- Header  pb-8 pt-5 pt-md-8-->
+
+    <!-- Page content -->
+    <!-- LIST -->
     <div class="header bg-gradient-primary pb-2 pt-md-8">
-      <div class="container-fluid">
-        <div class="header-body">
-          <!-- Card stats -->
-          <div class="row">
-            <div class="col-xl-4 col-lg-6">
-              <div class="card card-stats mb-4 mb-xl-0">
-                <div class="card-body">
-                  <div class="row">
-                    <div class="col">
-                      <h5 class="card-title text-uppercase text-muted mb-0">Number of Requirements</h5>
-                      <span class="h2 font-weight-bold mb-0">{{req_count}}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="col-xl-4 col-lg-6">
-              <div class="card card-stats mb-4 mb-xl-0">
-                <div class="card-body">
-                  <div class="row">
-                    <div class="col">
-                      <h5 class="card-title text-uppercase text-muted mb-0">Most Dependent</h5>
-                      <span class="h5 font-weight-bold mb-0">{{max_dependent}}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="col-xl-4 col-lg-6">
-              <div class="card card-stats mb-4 mb-xl-0">
-                <div class="card-body">
-                  <div class="row">
-                    <div class="col">
-                      <h5 class="card-title text-uppercase text-muted mb-0">Most Influential</h5>
-                      <span class="h5 font-weight-bold mb-0">{{max_influential}}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+      <div class="container-fluid pb-5">
+        <div class="row" style="margin-top: 3%; width: 50%; margin: 0 auto;">
+          <textarea id="new_req_text" style="width:60%">Write a new requirement here ...</textarea>
+          <a id="new_req_btn" href="#!" class="btn btn-primary" style="margin-left: 5%">Add New Requirement</a>
         </div>
       </div>
     </div>
-    <!-- Page content -->
-    <!-- LIST -->
-    <div class="container-fluid pb-5" style="margin-top: 3%;">
-      <div class="row" style="margin-top: 3% margin: 0 auto;">
-        <textarea id="new_req_text" style="width:70%">Write a new requirement here ...</textarea>
-        <a id="new_req_btn" href="#!" class="btn btn-primary" style="width: 25%; margin-left: 5%">Add New Requirement</a>
-      </div>
-      <hr>
-      <div class="row" style="margin: 0 auto;">
+
+    <div class="row" style="margin: 0 auto;">
+      <div class="card shadow" style="margin: 1% auto;">
         <div class="card-header border-0">
           <div class="row align-items-center">
             <div class="col">
-              <h3 class="mb-0">Requirements</h3>
+              <h3 class="mb-0">Dependencies</h3>
             </div>
             <div class="col text-right">
-              <a id="seeallreqs_btn" href="" class="btn btn-sm btn-primary">See All Requirements</a>
-            </div>
-            <div class="col text-right">
-              <a id="seeallreqs_btn" href="{% url 'riaapp:depslist' %}" class="btn btn-sm btn-primary">See All Dependencies</a>
+              <!--<a href="#!" class="btn btn-sm btn-primary">Button</a> -->
             </div>
           </div>
         </div>
@@ -184,19 +140,26 @@
           <table id="reqs_table" class="table align-items-center table-flush">
             <thead class="thead-light">
               <tr>
-                <th scope="col">Requirement Specification</th>
-                <th scope="col">Dependency Degree</th>
-                <!--<th scope="col">Influence Degree</th>-->
+                <th scope="col">Requirement one (from)</th>
+                <th scope="col">Requirement Two (to)</th>
+                <th scope="col">Correctness</th>
               </tr>
             </thead>
             <tbody>
-              {% for r in sortedReqs %}
+              {% for d in deps %}
               <tr>
-                <th scope="row" style="word-wrap: break-word; word-break: break-all; white-space: normal;">
-                  {{r.text}}
-                </th>
+                <td hidden="true">
+                  {{d.id}}
+                </td>
+                <td scope="row" style="word-wrap: break-word; word-break: break-all; white-space: normal;">
+                  {{d.source}}
+                </td>
+                <td style="word-wrap: break-word; word-break: break-all; white-space: normal;">
+                  {{d.destination}}
+                </td>
                 <td>
-                  {{r.indeg}}
+                  <a id="correct_btn" class="btn btn-sm btn-primary" style="background-color: #008000; color: white;">Correct</a>
+                  <a id="wrong_btn" class="btn btn-sm btn-primary" style="background-color: #DC143C; color: white;">Wrong</a>
                 </td>
               </tr>
               {% endfor %}
@@ -205,56 +168,9 @@
         </div>
       </div>
     </div>
-    <!-- mt--7 -->
-    <div class="container-fluid" style="margin-bottom: 20px;">
-      <div class="row">
-        <div class="col-xl-12 mb-5 mb-xl-0">
-          <div class="card bg-gradient-default shadow">
-            <div class="card-header bg-transparent">
-              <div class="row align-items-center">
-                <div class="col">
-                  <h6 id="presentation_type" class="text-uppercase text-light ls-1 mb-1">Graph Presentation</h6>
-                </div>
-                <div class="col">
-                  <ul class="nav nav-pills justify-content-end">
-                    <li id="graphbtn" class="nav-item mr-2 mr-md-0" data-toggle="chart" data-target="#chart-sales" data-update='{"data":{"datasets":[{"data":[0, 20, 10, 30, 15, 40, 20, 60, 60]}]}}' data-prefix="$" data-suffix="k">
-                      <a href="#" class="nav-link py-2 px-3 active" data-toggle="tab">
-                        <span class="d-none d-md-block">Graph Analysis</span>
-                        <span class="d-md-none">M</span>
-                      </a>
-                    </li>
-                    <li id="pathbtn" class="nav-item" data-toggle="chart" data-target="#chart-sales" data-update='{"data":{"datasets":[{"data":[0, 20, 5, 25, 10, 30, 15, 40, 40]}]}}' data-prefix="$" data-suffix="k">
-                      <a href="#" class="nav-link py-2 px-3" data-toggle="tab">
-                        <span class="d-none d-md-block">Path Analysis</span>
-                        <span class="d-md-none">W</span>
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            <div class="card-body">
-              <!-- Chart -->
-              <div class="chart">
-                <svg width=100% height=100% style="border-style: solid; border-width: medium;"></svg>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      
-      <!-- 
-      <footer class="footer">
-      <ul>
-        {% for n in longest_path %}
-        <li>
-          {{ n }}
-        </li>
-        {% endfor %}
-      </ul>
-    </footer>Footer -->
   </div>
+</div>
 </div>
 <!-- Argon Scripts -->
 <!-- Core -->
@@ -277,6 +193,36 @@
 <script src="{% static "riaapp/js/mydropdownjs.js" %}"></script>
 
 <script type="text/javascript">
+  $('#search_form').submit(function (e) {
+    terms = $('#search_input').val();
+    document.location.href = "{% url 'riaapp:searchresults' %}";
+  });
+
+  $("a").click(function (e) {
+    dep_id = e.currentTarget.parentElement.parentElement.children[0].innerText.trim();
+    positive = true;
+    if (e.currentTarget.id == 'wrong_btn') {
+      positive = false;
+    }
+    $.ajax({
+      url: '/riaapp/addlearninstance/',
+      data: {
+        'dep_id': dep_id,
+        'positive': positive
+      },
+      dataType: 'json',
+      success: function (data) {
+        if (positive == true) {
+          e.currentTarget.parentElement.parentElement.style.backgroundColor = "#2dce89";
+        } else {
+          e.currentTarget.parentElement.parentElement.style.backgroundColor = "#f5365c";
+        }
+        e.currentTarget.parentElement.parentElement.style.color = "white";
+      }
+    });
+
+  });
+
   function addReqFunction(){
     new_req_text = $('#new_req_text').val();
     $.ajax({
@@ -296,12 +242,8 @@
     });
   }
 
-  $('#search_input').keypress(function (e) {
-      console.log($('#search_input').val());
-  });
 
   $('#new_req_text').keypress(function (e) {
-    console.log('key injam');
     if(e.which == 13) {
       addReqFunction()
       $('#new_req_text').val("");
@@ -309,52 +251,9 @@
     }
   });
   $('#new_req_btn').click(function (e) {
-    console.log('button injam');
     addReqFunction();
   });
 
-  $('#graphbtn').click(function() {
-    $('#presentation_type').html("Disjoint Graph Presentation");
-    d3.select("svg").selectAll("*").remove();
-    $.get('/riaapp/getreqs/', {}, function(data){
-      nodes = [];
-      for (var i = 0; i < data.jreqs.length; i++) {
-        nodes.push({name: data.jreqs[i], id: i+1});
-      }
-      links = [];
-      for (var i = 0; i < data.jdeps.length; i++) {
-        s = data.jdeps[i].source;
-        d = data.jdeps[i].destination;
-        si = -1; di = -1;
-        for (var j = 0; j < nodes.length; j++) {
-          if (nodes[j].name == s)
-            si = nodes[j].id
-          if (nodes[j].name == d)
-            di = nodes[j].id
-          if (si > -1 && di > -1)
-            break;
-        }
-        links.push({source: si, target: di, type: "constrains"});
-      }
-      all = {};
-      all["nodes"] = nodes;
-      all["links"] = links;
-      drawDJGraph(all, d3.select("svg"));
-    });
-  });
-  
-  $('#pathbtn').click(function() {
-    $('#presentation_type').html("Path Presentation");
-    $.get('/riaapp/getlp/', {}, function(data){
-
-
-    });
-  });
-
-  $('#rankbtn').click(function() {
-    $('#presentation_type').html("Ranking Table Presentation");
-    d3.select("svg").selectAll("*").remove();
-  });
 </script>
 </body>
 

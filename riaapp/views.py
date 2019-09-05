@@ -3,13 +3,15 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.template import loader
 from django.urls import reverse
 from django.views import generic
-
 from django.http import JsonResponse
 
-from .models import Req, Dep, DepType
+from .models import Req, Dep, DepType, DepLearnInstance
 from .forms import DocumentForm
 from .modules.ml_modules import OverlapLib, ConstrainsIdentifier
 from .modules.graph_modules import Graph_Analysis, REI_Graph_PathAnylsis
+from .modules.utils import PreProcessing as pp
+
+dependency_name = 'relates'
 
 class IndexView(generic.ListView):
     template_name = 'riaapp/index.html'
@@ -27,8 +29,13 @@ def detail(request):
 ###########################################################################
 
 def loadReqs(doc):
+    if doc.name.endswith('csv'):
+        doc = pp.importJiraCSV_2(doc)
     for line in doc:
-        line_txt = line.decode("utf-8")
+        if not(isinstance(line, str)):
+            line_txt = line.decode("utf-8")
+        else:
+            line_txt = line
         if OverlapLib.hasVerb(line_txt):
             new_req = Req(text = line_txt)
             new_req.save()
@@ -37,12 +44,10 @@ def loadReqs(doc):
 def loadDeps(dep_type):
     c_id = ConstrainsIdentifier.ConstrainsIdentifier()
     for r1 in Req.objects.all():
-        req1 = c_id.parseReq(r1.text)
         for r2 in Req.objects.all():
             if r1 == r2:
                 continue
-            req2 = c_id.parseReq(r2.text)
-            if c_id.identify(req1, req2):
+            if c_id.identify(r1, r2):
                 new_dep = Dep(dep_type =dep_type, source = r1, destination = r2)
                 new_dep.save()
 
@@ -64,29 +69,70 @@ def analyze(request):
     DepType.objects.all().delete()
     Dep.objects.all().delete()
     
-    constrains_type = DepType(name="constrains")
+    constrains_type = DepType(name=dependency_name)
     constrains_type.save()
     
     loadDeps(constrains_type)
 
     rgraph = Graph_Analysis.ReqGraph()
     rgraph = Graph_Analysis.calculateNodeDegrees(rgraph)
-    sortedReqs = Req.objects.all().order_by('-indeg')
+    size_limit = Req.objects.all().count()
+    if size_limit > 10:
+        size_limit = 9
+    sortedReqs = Req.objects.all().order_by('-indeg')[:size_limit]
 
-    mainG = REI_Graph_PathAnylsis.importReqsToGraph()
-    dag = REI_Graph_PathAnylsis.transformToDAG(mainG)
-    longest_path = REI_Graph_PathAnylsis.getLongestPath(dag)
+    #mainG = REI_Graph_PathAnylsis.importReqsToGraph()
+    #dag = REI_Graph_PathAnylsis.transformToDAG(mainG)
+    #longest_path = REI_Graph_PathAnylsis.getLongestPath(dag)
 
-    response = {'req_count': Req.objects.all().count(), 'max_dependent': rgraph.max_indeg[0].text, 'max_influential': sortedReqs.reverse()[0], 'sortedReqs': sortedReqs, 'longest_path': longest_path}
+    response = {'req_count': Req.objects.all().count(), 'max_dependent': rgraph.max_indeg[0].text, 'max_influential': Req.objects.all().order_by('-indeg').reverse()[0], 'sortedReqs': sortedReqs}
     return render(request, 'riaapp/resadmin.html', response)
+###################################################################
+def searchresults(request):
+    response = {}
+    return render(request, 'riaapp/searchresults.html', response)
 
+def depslist(request):
+    response = {'deps': Dep.objects.all()}
+    return render(request, 'riaapp/depslist.html', response)
 
-####################################################################
+def addLearnInstance(request):
+    dep_id = request.GET.get('dep_id', None)
+    the_dep = Dep.objects.get(pk=dep_id)
+    the_positive = True if request.GET.get('positive', None) == 'true' else False
+    if the_dep != None:
+        existing_learn = DepLearnInstance.objects.filter(dep=the_dep)
+        if len(existing_learn) == 0 :
+            learn = DepLearnInstance.objects.create(dep=the_dep, positive=the_positive)
+            learn.save()
+        else:
+            existing_learn[0].positive = the_positive
+            existing_learn[0].save()
+    res = {}
+    return JsonResponse(res)
 
 def resadmin(request):
     response = {'content': 'ok', 'reqs': Req.objects.all()}
     return render(request, 'riaapp/resadmin.html', response)
 
+def addReq(request):
+    new_req_text = request.GET.get('req', None)
+    new_req = Req.objects.create(text=new_req_text)
+    c_id = ConstrainsIdentifier.ConstrainsIdentifier()
+    dep_type = DepType.objects.get(name=dependency_name)
+    for r in Req.objects.all():
+        if c_id.identify(new_req, r):
+            new_dep = Dep(dep_type =dep_type, source = new_req, destination = r)
+            new_dep.save()
+        if c_id.identify(r, new_req):
+            new_dep = Dep(dep_type =dep_type, source = r, destination = new_req)
+            new_dep.save()
+
+    success = False
+    if new_req != None:
+        success = True
+    res = {'successful': success}
+    return JsonResponse(res)
 
 def getReqs(request):
     rs = []

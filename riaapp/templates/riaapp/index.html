@@ -67,7 +67,6 @@
           <p id="dbsize" style="visibility: hidden;">{{ size }}</p>
           {% endif %}
           <button id="analyzebtn" class="btn btn-primary" style="width: 100%;">Analyze</button>
-          <button id="testbtn" class="btn" style="visibility: hidden; width: 100%;">Test</button>
           <br><br>
           <div id="myProgressdiv" style="visibility: hidden; width: 100%; background-color: #ddd;">
             <div id="myBar" style="width: 1%; height: 30px; background-color: #4CAF50;"></div>
@@ -120,10 +119,6 @@
         }
       }
       window.location.href = 'analyze';
-    });
-
-    $('#testbtn').click(function(){
-      
     });
   </script>
   {% endblock %}

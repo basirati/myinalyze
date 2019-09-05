@@ -1,0 +1,33 @@
+Emergency stop button must be provided at multiple locations that should be easily accessible to the operators
+An emergency stop button must be integrated with PPU to halt the operations safely without causing any damage to the system in case of emergency.
+The PPU must be able to operate safely and securely
+Any component or live wore without recommended insulation carrying current above safety limits should not be exposed to the outside environment.
+The PPU components must not be manufactured by any toxic substance.
+The pneumatic actuators must be free from any type of air leakage.
+PPU should be enveloped via casing or glass covering to prevent any kind of unauthorized access.
+The PPU should have provision to enable both Auto and Manual operation modes.
+The time to handle, stamp and sort all of the work pieces should be 40 minutes.
+PPU should have sensors to read current power consumption. An automated unit designated to pick and place work pieces from defined positions.
+PPU could contain a glass door with lock to allow only authorized access.
+The work piece characteristics must be compliant with the recommended characteristics.
+Dimensions must be 10 cm height and 10 cm radius.
+The weight must be below 10 kgs.
+The work piece must be metallic.
+Storage should be able to detect if is already full.
+The stack must be able to store defined number of all type of work pieces.
+The rate of providing pieces should be 10 pieces per second.
+The PPU must be able to handle defined work pieces in an efficient manner.
+The PPU must be able to stamp all kind of work pieces.
+The PPU must be able to sort according to unique property of work pieces.
+A temporary stack could be present at different places for easy sorting of work pieces.
+The PPU should be transportable via Trucks.
+For specific scenarios, PPU will sort according to given settings.
+PPU should be modular so that its constituents’ parts can be easily separated.
+Work pieces could contain unique RFID tags for its easy and reliable recognition.
+PPU should be able to measure the weight of the work pieces and distinguish different work pieces based on it.
+PPU should be able to sense the shade of the work pieces.
+The PPU must be able to distinguish between stamped and unstamped work pieces.
+While handling, PPU must be able to prioritize certain work pieces according to the settings after distinguishing it from others.
+The PPU must be able to recognize certain work pieces.
+The PPU must possess prescribed physical characteristics.
+The work piece transporter must ensure the safety of work pieces.

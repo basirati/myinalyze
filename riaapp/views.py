@@ -4,10 +4,11 @@ from django.template import loader
 from django.urls import reverse
 from django.views import generic
 from django.http import JsonResponse
+from django.core import serializers
 
 from .models import Req, Dep, DepType, DepLearnInstance
 from .forms import DocumentForm
-from .modules.ml_modules import OverlapLib, ConstrainsIdentifier
+from .modules.ml_modules import OverlapLib, DependencyIdentifier
 from .modules.graph_modules import Graph_Analysis, REI_Graph_PathAnylsis
 from .modules.utils import PreProcessing as pp
 
@@ -20,11 +21,6 @@ class IndexView(generic.ListView):
     def get_queryset(self):
           return Req.objects.all()
 
-###########################################################################
-
-def detail(request):
-    response = {'content': 22, 'reqs': 33}
-    return render(request, 'riaapp/detail.html', response)
 
 ###########################################################################
 
@@ -42,7 +38,7 @@ def loadReqs(doc):
 
 
 def loadDeps(dep_type):
-    c_id = ConstrainsIdentifier.ConstrainsIdentifier()
+    c_id = DependencyIdentifier.DependencyIdentifier()
     for r1 in Req.objects.all():
         for r2 in Req.objects.all():
             if r1 == r2:
@@ -87,9 +83,15 @@ def analyze(request):
 
     response = {'req_count': Req.objects.all().count(), 'max_dependent': rgraph.max_indeg[0].text, 'max_influential': Req.objects.all().order_by('-indeg').reverse()[0], 'sortedReqs': sortedReqs}
     return render(request, 'riaapp/resadmin.html', response)
+
 ###################################################################
+
 def searchresults(request):
-    response = {}
+    search_terms = request.GET.get('search_string').split()
+    res = Req.objects
+    for term in search_terms:
+        res = res.filter(text__icontains=term)
+    response = {'res': res}
     return render(request, 'riaapp/searchresults.html', response)
 
 def depslist(request):
@@ -118,7 +120,7 @@ def resadmin(request):
 def addReq(request):
     new_req_text = request.GET.get('req', None)
     new_req = Req.objects.create(text=new_req_text)
-    c_id = ConstrainsIdentifier.ConstrainsIdentifier()
+    c_id = DependencyIdentifier.DependencyIdentifier()
     dep_type = DepType.objects.get(name=dependency_name)
     for r in Req.objects.all():
         if c_id.identify(new_req, r):
@@ -144,6 +146,21 @@ def getReqs(request):
             tmp = {'source': d.source.text, 'destination': d.destination.text}
             ds.append(tmp)
     res = {'jreqs': rs, 'jdeps': ds}
+    return JsonResponse(res)
+
+def getReqDeps(request):
+    req_id = request.GET.get('req_id', None)
+    the_req = Req.objects.get(pk=req_id)
+    inf_objs = Dep.objects.filter(source=the_req)
+    influencing = []
+    for obj in inf_objs:
+        influencing.append(obj.destination.text)
+    depending_objs = Dep.objects.filter(destination=the_req)
+    depending = []
+    for obj in depending_objs:
+        depending.append(obj.source.text)
+    
+    res = {'influencing': influencing, 'depending': depending}
     return JsonResponse(res)
 
 def getLP(request):

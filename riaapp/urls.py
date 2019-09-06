@@ -11,5 +11,6 @@ urlpatterns = [
     re_path(r'^getlp/$', views.getLP, name='getlp'),
     re_path(r'^loadfile/$', views.loadfile, name='loadfile'),
     re_path(r'^addreq/$', views.addReq, name='addreq'),
-    re_path(r'^addlearninstance/$', views.addLearnInstance, name='addlearninstance')
+    re_path(r'^addlearninstance/$', views.addLearnInstance, name='addlearninstance'),
+    re_path(r'^getreqdeps/$', views.getReqDeps, name='getreqdeps')
 ]

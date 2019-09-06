@@ -82,21 +82,14 @@
         <div class="row">
           <!-- Form -->
           <span class="col-sm" style="color: white">Search Requirement</span>
-          <form class="navbar-search navbar-search-dark">
-            <div class="form-group mb-0">
-              <div class="input-group input-group-alternative">
-                <div class="input-group-prepend">
-                  <span class="input-group-text"><i class="fas fa-search"></i></span>
-                </div>
-                <input id='search_input' class="form-control" placeholder="Search" type="text">
-              </div>
-            </div>
+          <form class="navbar-search navbar-search-dark" action="{% url 'riaapp:searchresults' %}" method="GET">
+            <input name='search_string' class="form-control" placeholder="Search" type="text">
           </form>
           <span class="col-sm" style="color: white">Interdependency Types</span>
           <span class="col-sm">
             <dl class="dropdown"> 
               <dt>
-                <a href="#" class="mydd">
+                <a href="#">
                   <p class="multiSel"></p>  
                 </a>
               </dt>
@@ -113,41 +106,90 @@
     </nav>
 
     <!-- Page content -->
-    <div class="row" style="margin: 0 auto;">
-      <div class="row mt-5">
-        <div class="col-xl-12 mb-5 mb-xl-0">
-          <div class="card shadow">
-            <div class="card-header border-0">
-              <div class="row align-items-center">
-                <div class="col">
-                  <h3 class="mb-0">Dependencies</h3>
-                </div>
-                <div class="col text-right">
-                  <!--<a href="#!" class="btn btn-sm btn-primary">Button</a> -->
-                </div>
-              </div>
+    <div class="header bg-gradient-primary pb-2 pt-md-8">
+    </div>
+
+    <div class="card-deck" style="margin-right: 0.5%; margin-left: 0.5%; margin-top: 0.5%">
+      <div class="card shadow">
+        <div class="card-header border-0">
+          <div class="row align-items-center">
+            <div class="col">
+              <h3 class="mb-0">Search Results</h3>
             </div>
-            <div class="table-responsive">
-              <!-- Projects table -->
-              <table id="reqs_table" class="table align-items-center table-flush">
-                <thead class="thead-light">
-                  <tr>
-                    <th scope="col">Requirement one (from)</th>
-                    <th scope="col">Requirement Two (to)</th>
-                    <th scope="col">Correctness</th>
-                  </tr>
-                </thead>
-                <tbody>
-                </tbody>
-              </table>
+            <div class="col text-right">
             </div>
           </div>
+        </div>
+        <div class="table-responsive">
+          <table id="reqs_table" class="table align-items-center table-flush">
+            <thead class="thead-light">
+              <tr>
+                <th scope="col">Requirement</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in res %}
+              <tr>
+                <td hidden="true">
+                  {{r.id}}
+                </td>
+                <td class="clickable_req_cell" style="word-wrap: break-word; word-break: break-all; white-space: normal;">
+                  {{r.text}}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="card-deck" style="margin: 1%;">
+      <div class="card shadow">
+        <div class="card-header border-0">
+          <div class="row align-items-center">
+            <div class="col">
+              <h3 class="mb-0">Influencing On</h3>
+            </div>
+            <div class="col text-right">
+            </div>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table align-items-center table-flush">
+            <thead class="thead-light">
+              <tr>
+                <th scope="col">Requirement</th>
+              </tr>
+            </thead>
+            <tbody id="influencing_tbody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card shadow">
+        <div class="card-header border-0">
+          <div class="row align-items-center">
+            <div class="col">
+              <h3 class="mb-0">Depending On</h3>
+            </div>
+            <div class="col text-right">
+            </div>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table align-items-center table-flush">
+            <thead class="thead-light">
+              <tr>
+                <th scope="col">Requirement</th>
+              </tr>
+            </thead>
+            <tbody id="depending_tbody">
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
   </div>
-</div>
-</div>
 <!-- Argon Scripts -->
 <!-- Core -->
 <script src="{% static "riaapp/vendor/jquery/jquery.min.js" %}"></script>
@@ -169,34 +211,25 @@
 <script src="{% static "riaapp/js/mydropdownjs.js" %}"></script>
 
 <script type="text/javascript">
-  $('#search_input').keypress(function (e) {
-      terms = $('#search_input').val();
-
-  });
-
-  $("a").click(function (e) {
-    dep_id = e.currentTarget.parentElement.parentElement.children[0].innerText.trim();
-    positive = true;
-    if (e.currentTarget.id == 'wrong_btn') {
-      positive = false;
-    }
+  $(".clickable_req_cell").click(function(e) {
+    req_id = e.currentTarget.parentElement.children[0].innerText.trim();
     $.ajax({
-      url: '/riaapp/addlearninstance/',
+      url: '/riaapp/getreqdeps/',
       data: {
-        'dep_id': dep_id,
-        'positive': positive
+        'req_id': req_id,
       },
       dataType: 'json',
       success: function (data) {
-        if (positive == true) {
-          e.currentTarget.parentElement.parentElement.style.backgroundColor = "#2dce89";
-        } else {
-          e.currentTarget.parentElement.parentElement.style.backgroundColor = "#f5365c";
+        $("#influencing_tbody").empty();
+        for (i in data.influencing) {
+          $("#influencing_tbody").append("<tr><td>" + data.influencing[i] + "</td></tr>");
         }
-        e.currentTarget.parentElement.parentElement.style.color = "white";
+        $("#depending_tbody").empty();
+        for (i in data.depending) {
+          $("#depending_tbody").append("<tr><td>" + data.depending[i] + "</td></tr>");
+        }
       }
     });
-   
   });
 
   function addReqFunction(){

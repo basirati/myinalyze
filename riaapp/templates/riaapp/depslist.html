@@ -82,21 +82,14 @@
         <div class="row">
           <!-- Form -->
           <span class="col-sm" style="color: white">Search Requirement</span>
-          <form id="search_form" class="navbar-search navbar-search-dark">
-            <div class="form-group mb-0">
-              <div class="input-group input-group-alternative">
-                <div class="input-group-prepend">
-                  <span class="input-group-text"><i class="fas fa-search"></i></span>
-                </div>
-                <input id='search_input' class="form-control" placeholder="Search" type="text">
-              </div>
-            </div>
+          <form class="navbar-search navbar-search-dark" action="{% url 'riaapp:searchresults' %}" method="GET">
+            <input name='search_string' class="form-control" placeholder="Search" type="text">
           </form>
           <span class="col-sm" style="color: white">Interdependency Types</span>
           <span class="col-sm">
             <dl class="dropdown"> 
               <dt>
-                <a href="#" class="mydd">
+                <a href="#">
                   <p class="multiSel"></p>  
                 </a>
               </dt>
@@ -131,12 +124,10 @@
               <h3 class="mb-0">Dependencies</h3>
             </div>
             <div class="col text-right">
-              <!--<a href="#!" class="btn btn-sm btn-primary">Button</a> -->
             </div>
           </div>
         </div>
         <div class="table-responsive">
-          <!-- Projects table -->
           <table id="reqs_table" class="table align-items-center table-flush">
             <thead class="thead-light">
               <tr>
@@ -193,10 +184,7 @@
 <script src="{% static "riaapp/js/mydropdownjs.js" %}"></script>
 
 <script type="text/javascript">
-  $('#search_form').submit(function (e) {
-    terms = $('#search_input').val();
-    document.location.href = "{% url 'riaapp:searchresults' %}";
-  });
+  
 
   $("a").click(function (e) {
     dep_id = e.currentTarget.parentElement.parentElement.children[0].innerText.trim();

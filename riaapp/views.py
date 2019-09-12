@@ -5,71 +5,48 @@ from django.urls import reverse
 from django.views import generic
 from django.http import JsonResponse
 from django.core import serializers
+from django.forms.models import model_to_dict
+import json
 
-from .models import Req, Dep, DepType, DepLearnInstance
+from .models import Req, Dep, DepType, DepLearnInstance, NLPDoc
 from .forms import DocumentForm
-from .modules.ml_modules import OverlapLib, DependencyIdentifier
+from .modules.ml_modules.DependencyIdentifier import DependencyIdentifier
 from .modules.graph_modules import Graph_Analysis, REI_Graph_PathAnylsis
-from .modules.utils import PreProcessing as pp
+from .modules.utils import LoadData as ld
 
 dependency_name = 'relates'
+di = DependencyIdentifier(None)
 
 class IndexView(generic.ListView):
     template_name = 'riaapp/index.html'
     context_object_name = 'reqs'
-
     def get_queryset(self):
-          return Req.objects.all()
-
-
-###########################################################################
-
-def loadReqs(doc):
-    if doc.name.endswith('csv'):
-        doc = pp.importJiraCSV_2(doc)
-    for line in doc:
-        if not(isinstance(line, str)):
-            line_txt = line.decode("utf-8")
-        else:
-            line_txt = line
-        if OverlapLib.hasVerb(line_txt):
-            new_req = Req(text = line_txt)
-            new_req.save()
-
-
-def loadDeps(dep_type):
-    c_id = DependencyIdentifier.DependencyIdentifier()
-    for r1 in Req.objects.all():
-        for r2 in Req.objects.all():
-            if r1 == r2:
-                continue
-            if c_id.identify(r1, r2):
-                new_dep = Dep(dep_type =dep_type, source = r1, destination = r2)
-                new_dep.save()
+          return None
 
 
 def loadfile(request):
     content = "Successfull"
     if request.method == 'POST':
-        Req.objects.all().delete()
         form = DocumentForm(request.POST, request.FILES)
         if form.is_valid():
             doc = request.FILES['reqs_file']
-            loadReqs(doc)
+            Req.objects.all().delete()
+            DepType.objects.all().delete()
+            Dep.objects.all().delete()
+            NLPDoc.objects.all().delete()
+            DepLearnInstance.objects.all().delete()
+
+            ld.loadReqs(doc)
     else:
         content = "Uploading File Failed!"
     response = {'content': content, 'size': Req.objects.count()}
     return render(request, 'riaapp/index.html', response)
 
 def analyze(request):
-    DepType.objects.all().delete()
-    Dep.objects.all().delete()
-    
-    constrains_type = DepType(name=dependency_name)
-    constrains_type.save()
-    
-    loadDeps(constrains_type)
-
+    thetype = DepType(name=dependency_name)
+    thetype.save()
+    di.dep_type = thetype
+    di.loadDeps()
     rgraph = Graph_Analysis.ReqGraph()
     rgraph = Graph_Analysis.calculateNodeDegrees(rgraph)
     size_limit = Req.objects.all().count()
@@ -77,9 +54,9 @@ def analyze(request):
         size_limit = 9
     sortedReqs = Req.objects.all().order_by('-indeg')[:size_limit]
 
-    #mainG = REI_Graph_PathAnylsis.importReqsToGraph()
-    #dag = REI_Graph_PathAnylsis.transformToDAG(mainG)
-    #longest_path = REI_Graph_PathAnylsis.getLongestPath(dag)
+    mainG = REI_Graph_PathAnylsis.importReqsToGraph()
+    dag = REI_Graph_PathAnylsis.transformToDAG(mainG)
+    longest_path = REI_Graph_PathAnylsis.getLongestPath(dag)
 
     response = {'req_count': Req.objects.all().count(), 'max_dependent': rgraph.max_indeg[0].text, 'max_influential': Req.objects.all().order_by('-indeg').reverse()[0], 'sortedReqs': sortedReqs}
     return render(request, 'riaapp/resadmin.html', response)
@@ -105,7 +82,7 @@ def addLearnInstance(request):
     if the_dep != None:
         existing_learn = DepLearnInstance.objects.filter(dep=the_dep)
         if len(existing_learn) == 0 :
-            learn = DepLearnInstance.objects.create(dep=the_dep, positive=the_positive)
+            learn = DepLearnInstance.objects.create(dep_type=the_dep.dep_type, r1=the_dep.source.text, r2=the_dep.destination.text, positive=the_positive)
             learn.save()
         else:
             existing_learn[0].positive = the_positive
@@ -119,21 +96,23 @@ def resadmin(request):
 
 def addReq(request):
     new_req_text = request.GET.get('req', None)
-    new_req = Req.objects.create(text=new_req_text)
-    c_id = DependencyIdentifier.DependencyIdentifier()
-    dep_type = DepType.objects.get(name=dependency_name)
-    for r in Req.objects.all():
-        if c_id.identify(new_req, r):
-            new_dep = Dep(dep_type =dep_type, source = new_req, destination = r)
-            new_dep.save()
-        if c_id.identify(r, new_req):
-            new_dep = Dep(dep_type =dep_type, source = r, destination = new_req)
-            new_dep.save()
-
-    success = False
+    new_req = ld.addReq(new_req_text)
     if new_req != None:
-        success = True
-    res = {'successful': success}
+        di.updateDepsByNewReq(new_req)
+        new_req.indeg = Graph_Analysis.calNodeInDegree(new_req)
+        new_req.outdeg = Graph_Analysis.calNodeOutDegree(new_req)
+        new_req.save()
+        size_limit = Req.objects.all().count()
+        if size_limit > 10:
+            size_limit = 9
+        sortedReqs = []
+        for r in Req.objects.all().order_by('-indeg')[:size_limit]:
+            sortedReqs.append(json.dumps(model_to_dict(r)))
+        new_req_json = json.dumps(model_to_dict(new_req))
+        res = {'successful': True, 'sortedReqs': sortedReqs, 'new_req':new_req_json}
+    else:
+        res = {'successful': False}
+    
     return JsonResponse(res)
 
 def getReqs(request):

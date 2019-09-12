@@ -1,8 +1,14 @@
 import pandas as pd 
 import nltk
 import re
+from ..ml_modules import Feature_Extraction as fe
+from spacy.tokens import Doc
 
-def importJiraCSV(file_addr):
+
+def getDocFromBytes(doc_bytes):
+    return Doc(fe.simple_doc.vocab).from_bytes(doc_bytes)
+
+def importJiraCSV_bySentence(file_addr):
     data = pd.read_csv(file_addr, delimiter=';') 
     res = []
     for des in data['Description']:
@@ -17,7 +23,7 @@ def importJiraCSV(file_addr):
             res.append(s)
     return res
 
-def importJiraCSV_2(file_addr):
+def importJiraCSV_byIssue(file_addr):
     data = pd.read_csv(file_addr, delimiter=';') 
     res = []
     for des in data['Description']:
@@ -30,3 +36,8 @@ def importJiraCSV_2(file_addr):
         res.append(des)
     return res
 
+def hasVerb(doc):
+    for t in doc:
+        if t.tag_.startswith('VB'):
+            return True
+    return False

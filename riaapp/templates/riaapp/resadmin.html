@@ -111,82 +111,29 @@
         </div>
       </div>
     </nav>
-    <!-- Header  pb-8 pt-5 pt-md-8-->
     <div class="header bg-gradient-primary pb-2 pt-md-8">
-      <div class="container-fluid">
-        <div class="header-body">
-          <!-- Card stats -->
-          <div class="row">
-            <div class="col-xl-4 col-lg-6">
-              <div class="card card-stats mb-4 mb-xl-0">
-                <div class="card-body">
-                  <div class="row">
-                    <div class="col">
-                      <h5 class="card-title text-uppercase text-muted mb-0">Number of Requirements</h5>
-                      <span class="h2 font-weight-bold mb-0">{{req_count}}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="col-xl-4 col-lg-6">
-              <div class="card card-stats mb-4 mb-xl-0">
-                <div class="card-body">
-                  <div class="row">
-                    <div class="col">
-                      <h5 class="card-title text-uppercase text-muted mb-0">Most Dependent</h5>
-                      <span class="h5 font-weight-bold mb-0">{{max_dependent}}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="col-xl-4 col-lg-6">
-              <div class="card card-stats mb-4 mb-xl-0">
-                <div class="card-body">
-                  <div class="row">
-                    <div class="col">
-                      <h5 class="card-title text-uppercase text-muted mb-0">Most Influential</h5>
-                      <span class="h5 font-weight-bold mb-0">{{max_influential}}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
     <!-- Page content -->
-    <!-- LIST -->
-    <div class="container-fluid pb-5" style="margin-top: 3%;">
+    <div class="container-fluid pb-5" style="margin-top: 2%;">
       <div class="row" style="margin-top: 3% margin: 0 auto;">
-        <textarea id="new_req_text" style="width:70%">Write a new requirement here ...</textarea>
-        <a id="new_req_btn" href="#!" class="btn btn-primary" style="width: 25%; margin-left: 5%">Add New Requirement</a>
+        <textarea id="new_req_text" style="width:70%" placeholder="Write a new requirement here ..."></textarea>
+        <a id="new_req_btn" href="#!" class="btn btn-primary" style=" margin-left: 2%;">Add New Requirement</a>
+        <a id="scrollgraph_btn" href="#graphviz" class="btn btn-outline-primary" style=" margin-left: 1%">Graph Visualization</a>
       </div>
-      <hr>
-      <div class="row" style="margin: 0 auto;">
-        <div class="card-header border-0">
-          <div class="row align-items-center">
-            <div class="col">
-              <h3 class="mb-0">Requirements</h3>
-            </div>
-            <div class="col text-right">
-              <a id="seeallreqs_btn" href="" class="btn btn-sm btn-primary">See All Requirements</a>
-            </div>
-            <div class="col text-right">
-              <a id="seeallreqs_btn" href="{% url 'riaapp:depslist' %}" class="btn btn-sm btn-primary">See All Dependencies</a>
-            </div>
-          </div>
-        </div>
+      <div class="row" style="margin: 1% auto;">
         <div class="table-responsive">
-          <!-- Projects table -->
           <table id="reqs_table" class="table align-items-center table-flush">
             <thead class="thead-light">
               <tr>
-                <th scope="col">Requirement Specification</th>
-                <th scope="col">Dependency Degree</th>
-                <!--<th scope="col">Influence Degree</th>-->
+                <th scope="col">
+                  Requirement Specification
+                  <span style="margin-left: 2%;">
+                    <a id="seeallreqs_btn" href="" class="btn btn-sm btn-primary">See All Requirements</a>
+                    <a id="seeallreqs_btn" href="{% url 'riaapp:depslist' %}" class="btn btn-sm btn-primary">See All Dependencies</a>  
+                  </span>
+                </th>
+                <th scope="col">Depending On <br> (Number of Requirements)</th>
+                <th scope="col">Influencing On <br> (Number of Requirements)</th>
               </tr>
             </thead>
             <tbody>
@@ -198,6 +145,9 @@
                 <td>
                   {{r.indeg}}
                 </td>
+                <td>
+                  {{r.outdeg}}
+                </td>
               </tr>
               {% endfor %}
             </tbody>
@@ -206,7 +156,7 @@
       </div>
     </div>
     <!-- mt--7 -->
-    <div class="container-fluid" style="margin-bottom: 20px;">
+    <div id="graph_container" class="container-fluid" style="margin-bottom: 20px;">
       <div class="row">
         <div class="col-xl-12 mb-5 mb-xl-0">
           <div class="card bg-gradient-default shadow">
@@ -217,16 +167,10 @@
                 </div>
                 <div class="col">
                   <ul class="nav nav-pills justify-content-end">
-                    <li id="graphbtn" class="nav-item mr-2 mr-md-0" data-toggle="chart" data-target="#chart-sales" data-update='{"data":{"datasets":[{"data":[0, 20, 10, 30, 15, 40, 20, 60, 60]}]}}' data-prefix="$" data-suffix="k">
-                      <a href="#" class="nav-link py-2 px-3 active" data-toggle="tab">
-                        <span class="d-none d-md-block">Graph Analysis</span>
+                    <li id="graphbtn" class="nav-item mr-2 mr-md-0">
+                      <a href="#graphviz" class="nav-link py-2 px-3 active" data-toggle="tab">
+                        <span class="d-none d-md-block">(Re)Load Graph</span>
                         <span class="d-md-none">M</span>
-                      </a>
-                    </li>
-                    <li id="pathbtn" class="nav-item" data-toggle="chart" data-target="#chart-sales" data-update='{"data":{"datasets":[{"data":[0, 20, 5, 25, 10, 30, 15, 40, 40]}]}}' data-prefix="$" data-suffix="k">
-                      <a href="#" class="nav-link py-2 px-3" data-toggle="tab">
-                        <span class="d-none d-md-block">Path Analysis</span>
-                        <span class="d-md-none">W</span>
                       </a>
                     </li>
                   </ul>
@@ -234,8 +178,7 @@
               </div>
             </div>
             <div class="card-body">
-              <!-- Chart -->
-              <div class="chart">
+              <div class="chart" style="height: 800px">
                 <svg width=100% height=100% style="border-style: solid; border-width: medium;"></svg>
               </div>
             </div>
@@ -243,119 +186,128 @@
         </div>
       </div>
 
-      
-      <!-- 
-      <footer class="footer">
-      <ul>
-        {% for n in longest_path %}
-        <li>
-          {{ n }}
-        </li>
-        {% endfor %}
-      </ul>
-    </footer>Footer -->
+    </div>
   </div>
-</div>
-<!-- Argon Scripts -->
-<!-- Core -->
-<script src="{% static "riaapp/vendor/jquery/jquery.min.js" %}"></script>
-<script src="{% static "riaapp/vendor/bootstrap/js/bootstrap.bundle.min.js" %}"></script>
-<!-- Optional JS -->
-<script src="{% static "riaapp/vendor/chart.js/dist/Chart.min.js" %}"></script>
-<script src="{% static "riaapp/vendor/chart.js/dist/Chart.extension.js" %}"></script>
-<!-- Argon JS -->
-<script src="{% static "riaapp/js/argon.js" %}"></script>
+  <!-- Argon Scripts -->
+  <!-- Core -->
+  <script src="{% static "riaapp/vendor/jquery/jquery.min.js" %}"></script>
+  <script src="{% static "riaapp/vendor/bootstrap/js/bootstrap.bundle.min.js" %}"></script>
 
-<!-- JQUERY D3JS -->
-<script src="http://d3js.org/d3.v4.min.js" type="text/javascript"></script>
-<script src="http://d3js.org/d3-selection-multi.v1.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <!-- Optional JS -->
+  <script src="{% static "riaapp/vendor/chart.js/dist/Chart.min.js" %}"></script>
+  <script src="{% static "riaapp/vendor/chart.js/dist/Chart.extension.js" %}"></script>
 
-<!-- DisjointGraph JS -->
-<script src="{% static "riaapp/js/drawgraph.js" %}"></script>
-<!-- MYDROPDOWN JS -->
-<script src="{% static "riaapp/js/mydropdownjs.js" %}"></script>
 
-<script type="text/javascript">
-  function addReqFunction(){
-    new_req_text = $('#new_req_text').val();
-    $.ajax({
-      url: '/riaapp/addreq/',
-      data: {
-        'req': new_req_text
-      },
-      dataType: 'json',
-      success: function (data) {
-        if (data.successful) {
-          $('#reqs_table > tbody:last-child').append('<tr><th>'+new_req_text+'</th><td>'+'NN'+'</td></tr>');
+  <!-- Argon JS -->
+  <script src="{% static "riaapp/js/argon.js" %}"></script>
+
+  <!-- JQUERY D3JS -->
+  <script src="http://d3js.org/d3.v4.min.js" type="text/javascript"></script>
+  <script src="http://d3js.org/d3-selection-multi.v1.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+  <!-- DisjointGraph JS -->
+  <script src="{% static "riaapp/js/drawgraph.js" %}"></script>
+  <!-- MYDROPDOWN JS -->
+  <script src="{% static "riaapp/js/mydropdownjs.js" %}"></script>
+
+  <script type="text/javascript">
+    function addReqFunction(){
+
+      new_req_text = $('#new_req_text').val();
+      $.ajax({
+        url: '/riaapp/addreq/',
+        data: {
+          'req': new_req_text
+        },
+        dataType: 'json',
+        success: function (data) {
+          if (data.successful) {
+            $('#reqs_table > tbody').empty();
+            var flag = false;
+            for (i in data.sortedReqs)
+            {
+              r = JSON.parse(data.sortedReqs[i]);
+              if (r.text == new_req_text) { flag = true; }
+              $('#reqs_table > tbody').append('<tr><th>'+r.text+'</th><td>'+ r.indeg +'</td><td>'+ r.outdeg +'</td></tr>');
+            }
+            if (flag == false) {
+              $('#reqs_table > tbody:last-child').append('<tr><th>'+JSON.parse(data.new_req).text+'</th><td>'+ JSON.parse(data.new_req).indeg + '</td><td>'+ JSON.parse(data.new_req).outdeg +'</td></tr>');
+            }
+          }
+          else {
+            alert("An error occured!");
+          }
         }
-        else {
-          alert("An error occured!");
-        }
-      }
-    });
-  }
-
-  $('#search_input').keypress(function (e) {
-      console.log($('#search_input').val());
-  });
-
-  $('#new_req_text').keypress(function (e) {
-    console.log('key injam');
-    if(e.which == 13) {
-      addReqFunction()
-      $('#new_req_text').val("");
-      e.preventDefault();
+      });
     }
-  });
-  $('#new_req_btn').click(function (e) {
-    console.log('button injam');
-    addReqFunction();
-  });
 
-  $('#graphbtn').click(function() {
-    $('#presentation_type').html("Disjoint Graph Presentation");
-    d3.select("svg").selectAll("*").remove();
-    $.get('/riaapp/getreqs/', {}, function(data){
-      nodes = [];
-      for (var i = 0; i < data.jreqs.length; i++) {
-        nodes.push({name: data.jreqs[i], id: i+1});
+    $('#search_input').keypress(function (e) {
+      console.log($('#search_input').val());
+    });
+
+    $('#new_req_text').keypress(function (e) {
+      if(e.which == 13) {
+        addReqFunction()
+        $('#new_req_text').val("");
+        e.preventDefault();
       }
-      links = [];
-      for (var i = 0; i < data.jdeps.length; i++) {
-        s = data.jdeps[i].source;
-        d = data.jdeps[i].destination;
-        si = -1; di = -1;
-        for (var j = 0; j < nodes.length; j++) {
-          if (nodes[j].name == s)
-            si = nodes[j].id
-          if (nodes[j].name == d)
-            di = nodes[j].id
-          if (si > -1 && di > -1)
-            break;
+    });
+    $('#new_req_btn').click(function (e) {
+      addReqFunction();
+    });
+
+
+    $('#scrollgraph_btn').click(function(){
+      scrollingElement = (document.scrollingElement || document.body);
+      $(scrollingElement).animate({
+        scrollTop: $('#graph_container').position().top
+      }, 500);
+    });
+
+    $('#graphbtn').click(function() {
+      $('#presentation_type').html("Graph Presentation");
+      d3.select("svg").selectAll("*").remove();
+      $.get('/riaapp/getreqs/', {}, function(data){
+        nodes = [];
+        for (var i = 0; i < data.jreqs.length; i++) {
+          nodes.push({name: data.jreqs[i], id: i+1});
         }
-        links.push({source: si, target: di, type: "constrains"});
-      }
-      all = {};
-      all["nodes"] = nodes;
-      all["links"] = links;
-      drawDJGraph(all, d3.select("svg"));
+        links = [];
+        for (var i = 0; i < data.jdeps.length; i++) {
+          s = data.jdeps[i].source;
+          d = data.jdeps[i].destination;
+          si = -1; di = -1;
+          for (var j = 0; j < nodes.length; j++) {
+            if (nodes[j].name == s)
+              si = nodes[j].id
+            if (nodes[j].name == d)
+              di = nodes[j].id
+            if (si > -1 && di > -1)
+              break;
+          }
+          links.push({source: si, target: di, type: "relates"});
+        }
+        all = {};
+        all["nodes"] = nodes;
+        all["links"] = links;
+        drawDJGraph(all, d3.select("svg"));
+      });
     });
-  });
-  
-  $('#pathbtn').click(function() {
-    $('#presentation_type').html("Path Presentation");
-    $.get('/riaapp/getlp/', {}, function(data){
+
+    $('#pathbtn').click(function() {
+      $('#presentation_type').html("Path Presentation");
+      $.get('/riaapp/getlp/', {}, function(data){
 
 
+      });
     });
-  });
 
-  $('#rankbtn').click(function() {
-    $('#presentation_type').html("Ranking Table Presentation");
-    d3.select("svg").selectAll("*").remove();
-  });
-</script>
+    $('#rankbtn').click(function() {
+      $('#presentation_type').html("Ranking Table Presentation");
+      d3.select("svg").selectAll("*").remove();
+    });
+  </script>
 </body>
 
 </html>

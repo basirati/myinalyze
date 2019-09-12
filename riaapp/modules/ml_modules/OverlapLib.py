@@ -91,9 +91,3 @@ def getVerbSimilarityPortion(r1, r2):
 def getOverlap(r1, r2):
     return getVerbSimilarityPortion(r1, r2) + getNounSimilarityPortion(r1, r2)
 
-def hasVerb(s):
-    doc = nlp(s)
-    for t in doc:
-        if t.tag_.startswith('VB'):
-            return True
-    return False

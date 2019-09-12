@@ -1,47 +1,60 @@
-var colors = d3.scaleOrdinal(d3.schemeCategory10);
-var simulation;
-
+var width, height;
+var radius = 8
 
 function drawDJGraph(graph, svg) {
-	var width = +parseInt($('svg').css("width")),
-	height = +parseInt($('svg').css("height")),
-	node,
-	link;
-	svg.append('defs').append('marker')
-	.attrs({'id':'arrowhead',
-		'viewBox':'-0 -5 10 10',
-		'refX':13,
-		'refY':0,
-		'orient':'auto',
-		'markerWidth':13,
-		'markerHeight':13,
-		'xoverflow':'visible'})
-	.append('svg:path')
-	.attr('d', 'M 0,-5 L 10 ,0 L 0,5')
-	.attr('fill', '#999')
-	.style('stroke','none');
-
+	var	node, link;
+	
+	width = parseInt($('svg').css("width"));
+	height = parseInt($('svg').css("height"));
+	
 	simulation = d3.forceSimulation()
-	.force("link", d3.forceLink().id(function (d) {return d.id;}).distance(100).strength(1))
+	.force("link", d3.forceLink().id(function (d) {return d.id;}).distance(100).strength(0.5))
 	.force("charge", d3.forceManyBody())
 	.force("center", d3.forceCenter(width / 2, height / 2));
 
-	updateDJGraph(graph.links, graph.nodes, svg);
-	$("line").css({"stroke": "999", "stroke-opacity": ".6", "stroke-width": "1px"});
+	update(graph.links, graph.nodes, svg);
 }
 
-function updateDJGraph(links, nodes, svg) {
-	link = svg.selectAll(".link")
+function update(links, nodes, svg) {
+	var color = d3.scaleOrdinal(d3.schemeCategory20);
+
+	svg
+	.call(d3.zoom()
+		.extent([[0, 0], [width, height]])
+		.scaleExtent([0.5, 3])
+		.translateExtent([[0, 0], [width, height]])
+		.on("zoom", function () {
+			k = d3.event.transform.k;
+			svg.selectAll('g').attr("transform", d3.event.transform);
+		})
+		);
+
+	link = svg.append('g').selectAll("line.link")
 	.data(links)
-	.enter()
-	.append("line")
+	.enter().append("svg:line")
 	.attr("class", "link")
-	.attr('marker-end','url(#arrowhead)')
+	.attr("stroke", "black")
+	.attr("stroke-width", "1")
+	.attr('marker-end','url(#arrowhead)');
+
+	svg.append('g').append('defs').append('marker')
+	.attrs({'id':'arrowhead',
+		'viewBox':'2 -5 10 10',
+		'refX':25,
+		'refY':0,
+		'orient':'auto',
+		'markerWidth':10,
+		'markerHeight':10,
+		'xoverflow':'visible'})
+	.append('svg:path')
+	.attr('d', 'M 0,-5 L 10 ,0 L 0,5')
+	.attr('fill', '#999');
+
 
 	link.append("title")
 	.text(function (d) {return d.type;});
 
-	edgepaths = svg.selectAll(".edgepath")
+	edgepaths = svg.append('g').selectAll(".edgepath")
 	.data(links)
 	.enter()
 	.append('path')
@@ -53,7 +66,7 @@ function updateDJGraph(links, nodes, svg) {
 	})
 	.style("pointer-events", "none");
 
-	edgelabels = svg.selectAll(".edgelabel")
+	edgelabels = svg.append('g').selectAll(".edgelabel")
 	.data(links)
 	.enter()
 	.append('text')
@@ -72,7 +85,7 @@ function updateDJGraph(links, nodes, svg) {
 	.attr("startOffset", "50%")
 	.text(function (d) {return d.type});
 
-	node = svg.selectAll(".node")
+	node = svg.append('g').selectAll(".node")
 	.data(nodes)
 	.enter()
 	.append("g")
@@ -80,12 +93,12 @@ function updateDJGraph(links, nodes, svg) {
 	.call(d3.drag()
 		.on("start", dragstarted)
 		.on("drag", dragged)
-                    //.on("end", dragended)
-                    );
+		);
 
 	node.append("circle")
-	.attr("r", 5)
-	.style("fill", function (d, i) {return colors(i);})
+	.attr("r", radius - .75)
+	.style("fill", function (d, i) {return color(i);})
+	.style("stroke", function(d, i) { return d3.color(color(i)).darker(); })
 
 	node.append("title")
 	.text(function (d) {return d.name;});
@@ -95,9 +108,6 @@ function updateDJGraph(links, nodes, svg) {
 	.text(shortName)
 	.style("opacity", 0.5);
 
-			//var div = d3.select("body").append("div")
-			//.attr("class", "tooltip")				
-			//.style("opacity", 0);
 
 	node.on("mouseover", function(d) {		
 		d3.select(this)
@@ -106,12 +116,8 @@ function updateDJGraph(links, nodes, svg) {
 		.transition()
 		.duration(200)
 		.style("opacity", 1);
-				//div.transition()		
-				//.duration(200)		
-				//.style("opacity", .9);		
-				//div	.html('gooz' + "<br/>"  + 'booz')	
-				//.style("left", (d3.event.pageX) + "px")		
-				//.style("top", (d3.event.pageY - 28) + "px");	
+
+		d3.select(this).select("circle").style("opacity", 1);
 	})
 	.on("mouseout", function(d) {
 		d3.select(this)
@@ -119,10 +125,9 @@ function updateDJGraph(links, nodes, svg) {
 		.text(shortName)
 		.transition()
 		.duration(200)
-		.style("opacity", 0.5);		
-			//	div.transition()		
-			//	.duration(500)		
-			//	.style("opacity", 0);
+		.style("opacity", 0.5);
+
+		d3.select(this).select("circle").style("opacity", 0.65);
 	});
 
 	simulation
@@ -140,8 +145,10 @@ function ticked() {
 	.attr("x2", function (d) {return d.target.x;})
 	.attr("y2", function (d) {return d.target.y;});
 
-	node
+	node.attr("cx", function(d) { return d.x = Math.max(radius, Math.min(width - radius, d.x)); })
+	.attr("cy", function(d) { return d.y = Math.max(radius, Math.min(height - radius, d.y)); })
 	.attr("transform", function (d) {return "translate(" + d.x + ", " + d.y + ")";});
+
 
 	edgepaths.attr('d', function (d) {
 		return 'M ' + d.source.x + ' ' + d.source.y + ' L ' + d.target.x + ' ' + d.target.y;
@@ -150,6 +157,7 @@ function ticked() {
 	edgelabels.attr('transform', function (d) {
 		if (d.target.x < d.source.x) {
 			var bbox = this.getBBox();
+
 			rx = bbox.x + bbox.width / 2;
 			ry = bbox.y + bbox.height / 2;
 			return 'rotate(180 ' + rx + ' ' + ry + ')';

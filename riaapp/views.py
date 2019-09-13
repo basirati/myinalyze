@@ -16,6 +16,7 @@ from .modules.utils import LoadData as ld
 
 dependency_name = 'relates'
 di = DependencyIdentifier(None)
+max_size = 10
 
 class IndexView(generic.ListView):
     template_name = 'riaapp/index.html'
@@ -35,7 +36,6 @@ def loadfile(request):
             Dep.objects.all().delete()
             NLPDoc.objects.all().delete()
             DepLearnInstance.objects.all().delete()
-
             ld.loadReqs(doc)
     else:
         content = "Uploading File Failed!"
@@ -43,33 +43,38 @@ def loadfile(request):
     return render(request, 'riaapp/index.html', response)
 
 def analyze(request):
-    thetype = DepType(name=dependency_name)
-    thetype.save()
-    di.dep_type = thetype
-    di.loadDeps()
-    rgraph = Graph_Analysis.ReqGraph()
-    rgraph = Graph_Analysis.calculateNodeDegrees(rgraph)
-    size_limit = Req.objects.all().count()
-    if size_limit > 10:
-        size_limit = 9
+    if not DepType.objects.all().exists():
+        thetype = DepType(name=dependency_name)
+        thetype.save()
+        di.dep_type = thetype
+        di.loadDeps()
+        rgraph = Graph_Analysis.ReqGraph()
+        rgraph = Graph_Analysis.calculateNodeDegrees(rgraph)
+        #mainG = REI_Graph_PathAnylsis.importReqsToGraph()
+        #dag = REI_Graph_PathAnylsis.transformToDAG(mainG)
+        #longest_path = REI_Graph_PathAnylsis.getLongestPath(dag)
+
+    size_limit = min(Req.objects.all().count(), max_size)
     sortedReqs = Req.objects.all().order_by('-indeg')[:size_limit]
-
-    mainG = REI_Graph_PathAnylsis.importReqsToGraph()
-    dag = REI_Graph_PathAnylsis.transformToDAG(mainG)
-    longest_path = REI_Graph_PathAnylsis.getLongestPath(dag)
-
-    response = {'req_count': Req.objects.all().count(), 'max_dependent': rgraph.max_indeg[0].text, 'max_influential': Req.objects.all().order_by('-indeg').reverse()[0], 'sortedReqs': sortedReqs}
+    response = {'sortedReqs': sortedReqs}
     return render(request, 'riaapp/resadmin.html', response)
 
-###################################################################
 
 def searchresults(request):
-    search_terms = request.GET.get('search_string').split()
-    res = Req.objects
-    for term in search_terms:
-        res = res.filter(text__icontains=term)
-    response = {'res': res}
-    return render(request, 'riaapp/searchresults.html', response)
+    search_terms = request.GET.get('search_string')
+    isNone = False
+    if search_terms == None:
+        isNone = True
+
+    if isNone or search_terms == []:
+        response = {'res': Req.objects.all()}
+        return render(request, 'riaapp/searchresults.html', response)
+    else:
+        res = Req.objects
+        for term in search_terms:
+            res = res.filter(text__icontains=term)
+        response = {'res': res}
+        return render(request, 'riaapp/searchresults.html', response)
 
 def depslist(request):
     response = {'deps': Dep.objects.all()}
@@ -80,18 +85,18 @@ def addLearnInstance(request):
     the_dep = Dep.objects.get(pk=dep_id)
     the_positive = True if request.GET.get('positive', None) == 'true' else False
     if the_dep != None:
-        existing_learn = DepLearnInstance.objects.filter(dep=the_dep)
+        existing_learn = DepLearnInstance.objects.filter(r1=the_dep.source.text).filter(r2=the_dep.destination.text)
         if len(existing_learn) == 0 :
             learn = DepLearnInstance.objects.create(dep_type=the_dep.dep_type, r1=the_dep.source.text, r2=the_dep.destination.text, positive=the_positive)
             learn.save()
         else:
             existing_learn[0].positive = the_positive
             existing_learn[0].save()
-    res = {}
+    res = {'success': 'true'}
     return JsonResponse(res)
 
 def resadmin(request):
-    response = {'content': 'ok', 'reqs': Req.objects.all()}
+    response = {'reqs': Req.objects.all()}
     return render(request, 'riaapp/resadmin.html', response)
 
 def addReq(request):
@@ -102,9 +107,7 @@ def addReq(request):
         new_req.indeg = Graph_Analysis.calNodeInDegree(new_req)
         new_req.outdeg = Graph_Analysis.calNodeOutDegree(new_req)
         new_req.save()
-        size_limit = Req.objects.all().count()
-        if size_limit > 10:
-            size_limit = 9
+        size_limit = min(Req.objects.all().count(), max_size)
         sortedReqs = []
         for r in Req.objects.all().order_by('-indeg')[:size_limit]:
             sortedReqs.append(json.dumps(model_to_dict(r)))

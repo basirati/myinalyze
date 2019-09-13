@@ -45,28 +45,17 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="">
+            <a class="nav-link" href="{% url 'riaapp:searchresults' %}">
               <i class="ni ni-pin-3 text-orange"></i> Requirements
             </a>
           </li>
         </ul>
         <!-- Divider -->
         <hr class="my-3">
-        <h6 class="navbar-heading text-muted">Tools</h6>
+        <h6 class="navbar-heading text-muted"></h6>
         <ul class="navbar-nav mb-md-3">
           <li class="nav-item">
             <a class="nav-link" href="">
-              <i class="ni ni-spaceship"></i>Manage Interdepndency types
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="">
-              <i class="ni ni-palette"></i>Introduce Interdependency Types
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="https://demos.creative-tim.com/argon-dashboard/docs/components/alerts.html">
-              <i class="ni ni-ui-04"></i>Manage Samples for Interdependency Types
             </a>
           </li>
         </ul>
@@ -163,28 +152,30 @@
   </div>
 </div>
 </div>
-<!-- Argon Scripts -->
-<!-- Core -->
+
+
+<!-- JQUERY and BOOTSTRAP -->
 <script src="{% static "riaapp/vendor/jquery/jquery.min.js" %}"></script>
 <script src="{% static "riaapp/vendor/bootstrap/js/bootstrap.bundle.min.js" %}"></script>
-<!-- Optional JS -->
-<script src="{% static "riaapp/vendor/chart.js/dist/Chart.min.js" %}"></script>
-<script src="{% static "riaapp/vendor/chart.js/dist/Chart.extension.js" %}"></script>
+<!-- D3JS -->
+<script src="{% static "riaapp/vendor/d3/d3.js" %}"></script>
+<script src="{% static "riaapp/vendor/d3/d3.min.js" %}"></script>
+<script src="{% static "riaapp/vendor/d3/d3-selection-multi.js" %}"></script>
+<script src="{% static "riaapp/vendor/d3/d3-selection-multi.min.js" %}"></script>
+
 <!-- Argon JS -->
 <script src="{% static "riaapp/js/argon.js" %}"></script>
 
-<!-- JQUERY D3JS -->
-<script src="http://d3js.org/d3.v4.min.js" type="text/javascript"></script>
-<script src="http://d3js.org/d3-selection-multi.v1.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
 <!-- DisjointGraph JS -->
 <script src="{% static "riaapp/js/drawgraph.js" %}"></script>
 <!-- MYDROPDOWN JS -->
 <script src="{% static "riaapp/js/mydropdownjs.js" %}"></script>
 
+
+
+
 <script type="text/javascript">
-  
 
   $("a").click(function (e) {
     dep_id = e.currentTarget.parentElement.parentElement.children[0].innerText.trim();

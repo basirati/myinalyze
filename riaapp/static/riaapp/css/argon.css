@@ -301,6 +301,19 @@ table
     border-collapse: collapse;
 }
 
+table th:hover{
+    color: #27282b;
+	cursor: pointer;
+}
+
+table.hooverable td:hover{
+    color: #27282b;
+	cursor: pointer;
+	background-color: #dde1ed;
+}
+
+	
+
 caption
 {
     padding-top: 1rem;

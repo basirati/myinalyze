@@ -16,7 +16,9 @@ function drawDJGraph(graph, svg) {
 }
 
 function update(links, nodes, svg) {
-	var color = d3.scaleOrdinal(d3.schemeCategory20);
+	var color = d3.scaleOrdinal(d3['schemeSet3']);
+	
+	simulation.alphaTarget(0.3).restart()
 
 	svg
 	.call(d3.zoom()
@@ -96,12 +98,13 @@ function update(links, nodes, svg) {
 		);
 
 	node.append("circle")
-	.attr("r", radius - .75)
+	.attr("r", function(d) {return radius})
 	.style("fill", function (d, i) {return color(i);})
 	.style("stroke", function(d, i) { return d3.color(color(i)).darker(); })
 
 	node.append("title")
 	.text(function (d) {return d.name;});
+
 
 	node.append("text")
 	.attr("dy", -3)
@@ -112,7 +115,7 @@ function update(links, nodes, svg) {
 	node.on("mouseover", function(d) {		
 		d3.select(this)
 		.select("text")
-		.text(function (d) {return d.name})
+		.text(function (d) {return d.name;})
 		.transition()
 		.duration(200)
 		.style("opacity", 1);

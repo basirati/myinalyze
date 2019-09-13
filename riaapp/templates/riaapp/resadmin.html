@@ -45,28 +45,17 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="reqslist">
+            <a class="nav-link" href="{% url 'riaapp:searchresults' %}">
               <i class="ni ni-pin-3 text-orange"></i> Requirements
             </a>
           </li>
         </ul>
         <!-- Divider -->
         <hr class="my-3">
-        <h6 class="navbar-heading text-muted">.</h6>
+        <h6 class="navbar-heading text-muted"></h6>
         <ul class="navbar-nav mb-md-3">
           <li class="nav-item">
             <a class="nav-link" href="">
-              <i class="ni ni-spaceship"></i>Manage Interdepndency types
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="">
-              <i class="ni ni-palette"></i>Introduce Interdependency Types
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="https://demos.creative-tim.com/argon-dashboard/docs/components/alerts.html">
-              <i class="ni ni-ui-04"></i>Manage Samples for Interdependency Types
             </a>
           </li>
         </ul>
@@ -82,21 +71,14 @@
         <div class="row">
           <!-- Form -->
           <span class="col-sm" style="color: white">Search Requirement</span>
-          <form class="navbar-search navbar-search-dark">
-            <div class="form-group mb-0">
-              <div class="input-group input-group-alternative">
-                <div class="input-group-prepend">
-                  <span class="input-group-text"><i class="fas fa-search"></i></span>
-                </div>
-                <input id='search_input' class="form-control" placeholder="Search" type="text">
-              </div>
-            </div>
+          <form id="search_form" class="navbar-search navbar-search-dark" action="{% url 'riaapp:searchresults' %}" method="GET">
+            <input name='search_string' class="form-control" placeholder="Search" type="text">
           </form>
           <span class="col-sm" style="color: white">Interdependency Types</span>
           <span class="col-sm">
             <dl class="dropdown"> 
               <dt>
-                <a href="#" class="mydd">
+                <a href="#">
                   <p class="multiSel"></p>  
                 </a>
               </dt>
@@ -111,25 +93,28 @@
         </div>
       </div>
     </nav>
+
+
+
     <div class="header bg-gradient-primary pb-2 pt-md-8">
     </div>
     <!-- Page content -->
     <div class="container-fluid pb-5" style="margin-top: 2%;">
-      <div class="row" style="margin-top: 3% margin: 0 auto;">
-        <textarea id="new_req_text" style="width:70%" placeholder="Write a new requirement here ..."></textarea>
-        <a id="new_req_btn" href="#!" class="btn btn-primary" style=" margin-left: 2%;">Add New Requirement</a>
-        <a id="scrollgraph_btn" href="#graphviz" class="btn btn-outline-primary" style=" margin-left: 1%">Graph Visualization</a>
+      <div class="row" style="margin-top: 3% margin: 0 auto; white-space: nowrap;">
+        <textarea id="new_req_text" style="width:65%" placeholder="Write a new requirement here ..."></textarea>
+        <a id="new_req_btn" href="#!" class="btn btn-primary" style=" margin-left: 2%; vertical-align: middle; ">Add New Requirement</a>
+        <a id="scrollgraph_btn" href="#graphviz" class="btn btn-outline-primary" style=" margin-left: 1%; vertical-align: middle; ">Graph Visualization</a>
       </div>
       <div class="row" style="margin: 1% auto;">
         <div class="table-responsive">
-          <table id="reqs_table" class="table align-items-center table-flush">
+          <table id="reqs_table" class="table align-items-center table-hover">
             <thead class="thead-light">
               <tr>
-                <th scope="col">
+                <th scope="col" style="cursor: auto;">
                   Requirement Specification
                   <span style="margin-left: 2%;">
-                    <a id="seeallreqs_btn" href="" class="btn btn-sm btn-primary">See All Requirements</a>
-                    <a id="seeallreqs_btn" href="{% url 'riaapp:depslist' %}" class="btn btn-sm btn-primary">See All Dependencies</a>  
+                    <a id="seeallreqs_btn" href="{% url 'riaapp:searchresults' %}" class="btn btn-sm btn-primary" >See All Requirements</a>
+                    <a id="seealldeps_btn" href="{% url 'riaapp:depslist' %}" class="btn btn-sm btn-primary">See All Dependencies</a>  
                   </span>
                 </th>
                 <th scope="col">Depending On <br> (Number of Requirements)</th>
@@ -139,6 +124,9 @@
             <tbody>
               {% for r in sortedReqs %}
               <tr>
+                <th hidden="true">
+                  {{r.id}}
+                </th>
                 <th scope="row" style="word-wrap: break-word; word-break: break-all; white-space: normal;">
                   {{r.text}}
                 </th>
@@ -168,10 +156,10 @@
                 <div class="col">
                   <ul class="nav nav-pills justify-content-end">
                     <li id="graphbtn" class="nav-item mr-2 mr-md-0">
-                      <a href="#graphviz" class="nav-link py-2 px-3 active" data-toggle="tab">
-                        <span class="d-none d-md-block">(Re)Load Graph</span>
-                        <span class="d-md-none">M</span>
-                      </a>
+                      <button type="button" class="btn btn-primary">(Re)Load Graph</button>
+                    </li>
+                    <li id="totop_btn" class="nav-item mr-2 mr-md-0">
+                      <button type="button" class="btn btn-secondary">Back To Top</button>
                     </li>
                   </ul>
                 </div>
@@ -187,31 +175,93 @@
       </div>
 
     </div>
+    
+    <div id="popcontent" style="display: none;">
+      <div class="card" style="width: 25rem;">
+        <div class="card-body">
+          <h5 class="card-title">Influences on</h5>
+          <table class="table" style="display: block; max-height: 250px; overflow-y: scroll;">
+            <tbody id="influencing_pop_tbody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" style="width: 25rem;">
+        <div class="card-body">
+          <h5 class="card-title">Depends on</h5>
+          <table class="table" style="display: block; max-height: 250px; block; overflow-y: scroll;">
+            <tbody id="depending_pop_tbody" >
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
   </div>
-  <!-- Argon Scripts -->
-  <!-- Core -->
+
+
+  <!-- JQUERY and BOOTSTRAP -->
   <script src="{% static "riaapp/vendor/jquery/jquery.min.js" %}"></script>
   <script src="{% static "riaapp/vendor/bootstrap/js/bootstrap.bundle.min.js" %}"></script>
-
-  <!-- Optional JS -->
-  <script src="{% static "riaapp/vendor/chart.js/dist/Chart.min.js" %}"></script>
-  <script src="{% static "riaapp/vendor/chart.js/dist/Chart.extension.js" %}"></script>
-
+  <!-- D3JS -->
+  <script src="{% static "riaapp/vendor/d3/d3.js" %}"></script>
+  <script src="{% static "riaapp/vendor/d3/d3.min.js" %}"></script>
+  <script src="{% static "riaapp/vendor/d3/d3-selection-multi.js" %}"></script>
+  <script src="{% static "riaapp/vendor/d3/d3-selection-multi.min.js" %}"></script>
 
   <!-- Argon JS -->
   <script src="{% static "riaapp/js/argon.js" %}"></script>
 
-  <!-- JQUERY D3JS -->
-  <script src="http://d3js.org/d3.v4.min.js" type="text/javascript"></script>
-  <script src="http://d3js.org/d3-selection-multi.v1.js"></script>
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
   <!-- DisjointGraph JS -->
   <script src="{% static "riaapp/js/drawgraph.js" %}"></script>
   <!-- MYDROPDOWN JS -->
   <script src="{% static "riaapp/js/mydropdownjs.js" %}"></script>
 
+
+
+
+
   <script type="text/javascript">
+    $(document).click(function() {
+      $('#reqs_table > tbody > tr > th').popover('hide');
+    });
+
+    $('#reqs_table > tbody > tr > th').click(function(e) {
+      e.stopPropagation();
+      req_id = e.currentTarget.parentElement.children[0].innerText;
+      $('#reqs_table > tbody > tr > th').popover('hide');
+      $(e.target).popover({
+        html: true,
+        content: function() {
+          return $('#popcontent').html();
+        },
+    });
+      $.ajax({
+        url: '/riaapp/getreqdeps/',
+        data: {
+          'req_id': req_id,
+        },
+        dataType: 'json',
+        success: function (data) {
+        $("#influencing_pop_tbody").empty();
+        for (i in data.influencing) {
+          $("#influencing_pop_tbody").append("<tr><td>" + data.influencing[i] + "</td></tr>");
+        }
+        $("#depending_pop_tbody").empty();
+        for (i in data.depending) {
+          $("#depending_pop_tbody").append("<tr><td>" + data.depending[i] + "</td></tr>");
+        }
+        $(e.target).popover('show');
+        last_target = e.target;
+        $('.popover').css('left', e.clientX + 'px');
+        $('.popover').css('top', e.clientY + 'px')
+        }
+    });
+    });
+
     function addReqFunction(){
 
       new_req_text = $('#new_req_text').val();
@@ -257,6 +307,12 @@
       addReqFunction();
     });
 
+    $('#totop_btn').click(function(){
+      scrollingElement = (document.scrollingElement || document.body);
+      $(scrollingElement).animate({
+        scrollTop: 0
+      }, 500);
+    });
 
     $('#scrollgraph_btn').click(function(){
       scrollingElement = (document.scrollingElement || document.body);

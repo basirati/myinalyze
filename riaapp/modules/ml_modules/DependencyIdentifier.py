@@ -63,15 +63,19 @@ class DependencyIdentifier:
                     new_dep.save()
 
     def updateDepsByNewReq(self, new_req):
+        new_deps = []
         new_r_doc = pp.getDocFromBytes(new_req.nlp_doc.doc)
         for r in Req.objects.all():
             r2doc = pp.getDocFromBytes(r.nlp_doc.doc) 
             if self.identifyDOC(new_r_doc, r2doc):
                 new_dep = Dep(dep_type =self.dep_type, source = new_req, destination = r)
                 new_dep.save()
+                new_deps.append(new_dep)
             if self.identifyDOC(r2doc, new_r_doc):
                 new_dep = Dep(dep_type =self.dep_type, source = r, destination = new_req)
                 new_dep.save()
+                new_deps.append(new_dep)
+        return new_deps
 
 
     def identifyOBJ(self, req1, req2):

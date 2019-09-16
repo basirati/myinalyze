@@ -103,16 +103,24 @@ def addReq(request):
     new_req_text = request.GET.get('req', None)
     new_req = ld.addReq(new_req_text)
     if new_req != None:
-        di.updateDepsByNewReq(new_req)
+        new_deps = di.updateDepsByNewReq(new_req)
         new_req.indeg = Graph_Analysis.calNodeInDegree(new_req)
         new_req.outdeg = Graph_Analysis.calNodeOutDegree(new_req)
         new_req.save()
+        
         size_limit = min(Req.objects.all().count(), max_size)
         sortedReqs = []
         for r in Req.objects.all().order_by('-indeg')[:size_limit]:
             sortedReqs.append(json.dumps(model_to_dict(r)))
+        new_depends_txt = []
+        new_influences_txt = []
+        for d in new_deps:
+            if d.source == new_req:
+                new_influences_txt.append(d.destination.text)
+            else:
+                new_depends_txt.append(d.source.text)
         new_req_json = json.dumps(model_to_dict(new_req))
-        res = {'successful': True, 'sortedReqs': sortedReqs, 'new_req':new_req_json}
+        res = {'successful': True, 'sortedReqs': sortedReqs, 'new_depends': new_depends_txt, 'new_influences': new_influences_txt,'new_req':new_req_json}
     else:
         res = {'successful': False}
     

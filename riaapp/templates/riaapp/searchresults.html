@@ -221,38 +221,6 @@
       });
     });
 
-    function addReqFunction(){
-      new_req_text = $('#new_req_text').val();
-      $.ajax({
-        url: '/riaapp/addreq/',
-        data: {
-          'req': new_req_text
-        },
-        dataType: 'json',
-        success: function (data) {
-          if (data.successful) {
-            $('#reqs_table > tbody:last-child').append('<tr><th>'+new_req_text+'</th><td>'+'NN'+'</td></tr>');
-          }
-          else {
-            alert("An error occured!");
-          }
-        }
-      });
-    }
-
-
-    $('#new_req_text').keypress(function (e) {
-      console.log('key injam');
-      if(e.which == 13) {
-        addReqFunction()
-        $('#new_req_text').val("");
-        e.preventDefault();
-      }
-    });
-    $('#new_req_btn').click(function (e) {
-      addReqFunction();
-    });
-
   </script>
 </body>
 

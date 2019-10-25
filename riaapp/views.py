@@ -126,12 +126,12 @@ def addReq(request):
     
     return JsonResponse(res)
 
-def getReqs(request):
+def getAllReqsAndDeps(request):
     rs = []
     ds = []
     if request.method == 'GET':
         for r in Req.objects.all():
-            rs.append(r.text)
+            rs.append(json.dumps(model_to_dict(r)))
         for d in Dep.objects.all():
             tmp = {'source': d.source.text, 'destination': d.destination.text}
             ds.append(tmp)

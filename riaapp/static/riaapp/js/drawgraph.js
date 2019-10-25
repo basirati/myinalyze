@@ -98,7 +98,7 @@ function update(links, nodes, svg) {
 		);
 
 	node.append("circle")
-	.attr("r", function(d) {return radius})
+	.attr("r", function(d) {return (Math.sqrt(d.outdeg + 1) * radius)})
 	.style("fill", function (d, i) {return color(i);})
 	.style("stroke", function(d, i) { return d3.color(color(i)).darker(); })
 

@@ -3,6 +3,34 @@ from .modules.utils import PreProcessing as pp
 from django.db.models.query_utils import DeferredAttribute
 
 
+#class Project(models.Model):
+#	Issues []
+#	HighDeps []
+#	name []
+#	(clf, vec)s files []
+#	DepLearnInstances []
+#	isAnalyzed boolean
+
+
+
+#class Issue(models.Model):
+#	Category
+#	created_by
+#	assigned_to [text]
+#	Reqs []
+#	main_req	maybe
+#	priority
+#	
+
+#class HighDeps(models.Model):
+#	DepType
+#	source issue
+#	destination issue
+#	strength = models.IntegerField(default = 1)
+
+
+
+#in coofti ro move kon tu khode req, shayad behtare
 class NLPDoc(models.Model):
 	doc = models.BinaryField(max_length=None, default = None)
 

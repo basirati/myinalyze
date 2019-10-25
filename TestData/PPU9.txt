@@ -4,6 +4,6 @@ The PPU must be able to operate safely and securely
 Any component or live wore without recommended insulation carrying current above safety limits should not be exposed to the outside environment.
 The PPU components must not be manufactured by any toxic substance.
 The PPU should have provision to enable both Auto and Manual operation modes.
-The time to handle, stamp and sort all of the work pieces should be 40 minutes.
-PPU should have sensors to read current power consumption. An automated unit designated to pick and place work pieces from defined positions.
-
+The time to handle, stamp and sort all of the work pieces should be 5 minutes.
+PPU should have sensors to read current power consumption.
+Every work piece must be sorted by PPU in 10 minutes. 

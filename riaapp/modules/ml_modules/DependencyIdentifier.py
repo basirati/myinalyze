@@ -16,8 +16,10 @@ class DependencyIdentifier:
     vec = None
     dep_type = None
     def __init__(self, type):
-        self.clf = load('riaapp/modules/ml_models/mentropy_constrains.joblib')
-        self.vec = load('riaapp/modules/ml_models/vectorizer_constrains.joblib')
+        #self.clf = load('riaapp/modules/ml_models/mentropy_constrains.joblib')
+        #self.vec = load('riaapp/modules/ml_models/vectorizer_constrains.joblib')
+        self.clf = load('riaapp/modules/ml_models/extra_tree.joblib')
+        self.vec = load('riaapp/modules/ml_models/vectorizer.joblib')
         self.dep_type = type
 
 

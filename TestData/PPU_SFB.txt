@@ -1,0 +1,8 @@
+Emergency stop button must be provided at multiple locations that should be easily accessible to the operators.
+The PPU components must not be manufactured by any toxic substance.
+An emergency stop button must be integrated with PPU to halt the operations safely without causing any damage to the system in case of emergency.
+An efficient transportation mechanism could be used to transport different work pieces fastly.
+The sorting unit, stamping unit and stack must be capable of handling all kinds of work pieces.
+PPU should be able to measure the weight of the work pieces and distinguish different work pieces based on it.
+Any component or live wire without recommended insulation carrying current above safety limits should not be exposed to the outside environment.
+The time to handle stamp and sort all of the work pieces should be 10 minutes.

@@ -282,7 +282,7 @@
               $('#reqs_table > tbody').append('<tr><th>'+r.text+'</th><td>'+ r.indeg +'</td><td>'+ r.outdeg +'</td></tr>');
             }
             if (flag == false) {
-              $('#reqs_table > tbody:last-child').append('<tr><th>'+JSON.parse(data.new_req).text+'</th><td>'+ JSON.parse(data.new_req).indeg + '</td><td>'+ JSON.parse(data.new_req).outdeg +'</td></tr>');
+              $('#reqs_table > tbody:last-child').append('<tr><th>'+ JSON.parse(data.new_req).id +'</th><th>' + JSON.parse(data.new_req).text+'</th><td>' + JSON.parse(data.new_req).indeg + '</td><td>'+ JSON.parse(data.new_req).outdeg +'</td></tr>');
             }
           }
           else {
@@ -324,10 +324,10 @@
     $('#graphbtn').click(function() {
       $('#presentation_type').html("Graph Presentation");
       d3.select("svg").selectAll("*").remove();
-      $.get('/riaapp/getreqs/', {}, function(data){
+      $.get('/riaapp/getallreqsanddeps/', {}, function(data){
         nodes = [];
         for (var i = 0; i < data.jreqs.length; i++) {
-          nodes.push({name: data.jreqs[i], id: i+1});
+          nodes.push({name: JSON.parse(data.jreqs[i]).text, outdeg: JSON.parse(data.jreqs[i]).outdeg, id: i+1});
         }
         links = [];
         for (var i = 0; i < data.jdeps.length; i++) {
@@ -342,7 +342,7 @@
             if (si > -1 && di > -1)
               break;
           }
-          links.push({source: si, target: di, type: "relates"});
+          links.push({source: si, target: di, type: "depends on"});
         }
         all = {};
         all["nodes"] = nodes;

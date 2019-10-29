@@ -1,180 +1,58 @@
-{% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="Start your development with a Dashboard for Bootstrap 4.">
-  <meta name="author" content="Creative Tim">
-  <title>REINALYZE</title>
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
-  <!-- Icons -->
-  <link href="{% static "riaapp/vendor/nucleo/css/nucleo.css" %}" rel="stylesheet">
-  <link href="{% static "riaapp/vendor/@fortawesome/fontawesome-free/css/all.min.css" %}" rel="stylesheet">
-  <!-- Argon CSS -->
-  <link type="text/css" href="{% static "riaapp/css/argon.css" %}" rel="stylesheet">
-  <!-- mydropdown CSS -->
-  <link type="text/css" href="{% static "riaapp/css/mydropdown.css" %}" rel="stylesheet">
-</head>
-
-<body>
-  <!-- Sidenav -->
-  <nav class="navbar navbar-vertical fixed-left navbar-expand-md navbar-light bg-white" id="sidenav-main">
-    <div class="container-fluid">
-      <!-- Toggler -->
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#sidenav-collapse-main" aria-controls="sidenav-main" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <!-- Brand -->
-      <a class="navbar-brand pt-0" href="{% url 'riaapp:index' %}">
-        <img src="{% static "riaapp/img/brand/blue.png" %}" class="navbar-brand-img" alt="logo">
-      </a>
-      <!-- Collapse -->
-      <div class="collapse navbar-collapse" id="sidenav-collapse-main">
-        <!-- Navigation -->
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'riaapp:analyze' %}">
-              <i class="ni ni-tv-2 text-primary"></i> Overview
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'riaapp:depslist' %}">
-              <i class="ni ni-planet text-blue"></i> Dependencies
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'riaapp:searchresults' %}">
-              <i class="ni ni-pin-3 text-orange"></i> Requirements
-            </a>
-          </li>
-        </ul>
-        <!-- Divider -->
-        <hr class="my-3">
-        <h6 class="navbar-heading text-muted"></h6>
-        <ul class="navbar-nav mb-md-3">
-          <li class="nav-item">
-            <a class="nav-link" href="">
-            </a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-
-  <!-- Main content -->
-  <div class="main-content">
-    <!-- Top navbar -->
-    <nav class="navbar navbar-top navbar-expand-md navbar-dark" id="navbar-main">
-      <div class="container">
-        <div class="row">
-          <!-- Form -->
-          <span class="col-sm" style="color: white">Search Requirement</span>
-          <form class="navbar-search navbar-search-dark" action="{% url 'riaapp:searchresults' %}" method="GET">
-            <input name='search_string' class="form-control" placeholder="Search" type="text">
-          </form>
-          <span class="col-sm" style="color: white">Interdependency Types</span>
-          <span class="col-sm">
-            <dl class="dropdown"> 
-              <dt>
-                <a href="#">
-                  <p class="multiSel"></p>  
-                </a>
-              </dt>
-              <dd>
-                <div class="mutliSelect">
-                  <ul>
-                  </ul>
-                </div>
-              </dd>
-            </dl>
-          </span>
+{% extends 'riaapp/admin_base.html' %}
+{% block content %}
+<div class="row" style="margin: 0 auto;">
+  <div class="card shadow" style="margin: 1% auto;">
+    <div class="card-header border-0">
+      <div class="row align-items-center">
+        <div class="col">
+          <h3 class="mb-0">Dependencies</h3>
         </div>
-      </div>
-    </nav>
-
-    <!-- Page content -->
-    <!-- LIST -->
-    <div class="header bg-gradient-primary pb-2 pt-md-8">
-      <div class="container-fluid pb-5">
-        <div class="row" style="margin-top: 3%; width: 50%; margin: 0 auto;">
-          <textarea id="new_req_text" style="width:60%" placeholder="Write a new requirement here ..."></textarea>
-          <a id="new_req_btn" href="#!" class="btn btn-primary" style="margin-left: 5%">Add New Requirement</a>
+        <div class="col text-right">
         </div>
       </div>
     </div>
-
-    <div class="row" style="margin: 0 auto;">
-      <div class="card shadow" style="margin: 1% auto;">
-        <div class="card-header border-0">
-          <div class="row align-items-center">
-            <div class="col">
-              <h3 class="mb-0">Dependencies</h3>
-            </div>
-            <div class="col text-right">
-            </div>
-          </div>
-        </div>
-        <div class="table-responsive">
-          <table id="deps_table" class="table align-items-center table-flush">
-            <thead class="thead-light">
-              <tr>
-                <th scope="col">Requirement one (from)</th>
-                <th scope="col">Requirement Two (to)</th>
-                <th scope="col">Correctness</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for d in deps %}
-              <tr>
-                <td hidden="true">
-                  {{d.id}}
-                </td>
-                <td scope="row" style="word-wrap: break-word; word-break: break-all; white-space: normal;">
-                  {{d.source}}
-                </td>
-                <td style="word-wrap: break-word; word-break: break-all; white-space: normal;">
-                  {{d.destination}}
-                </td>
-                <td>
-                  <a id="correct_btn" class="btn btn-sm btn-primary" style="background-color: #008000; color: white;">Correct</a>
-                  <a id="wrong_btn" class="btn btn-sm btn-primary" style="background-color: #DC143C; color: white;">Wrong</a>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
+    <div class="table-responsive">
+      <table id="deps_table" class="table align-items-center table-flush">
+        <thead class="thead-light">
+          <tr>
+            <th scope="col">First Requirement (from)</th>
+            <th scope="col">Second Requirement (to)</th>
+            <th scope="col">Correctness</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in deps %}
+          <tr>
+            <td hidden="true">
+              {{d.id}}
+            </td>
+            <td scope="row" style="word-wrap: break-word; word-break: break-all; white-space: normal;">
+              {{d.source}}
+            </td>
+            <td style="word-wrap: break-word; word-break: break-all; white-space: normal;">
+              {{d.destination}}
+            </td>
+            <td>
+              <a id="correct_btn" class="btn btn-sm btn-primary" style="background-color: #008000; color: white;">Correct</a>
+              <a id="wrong_btn" class="btn btn-sm btn-primary" style="background-color: #DC143C; color: white;">Wrong</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-
   </div>
 </div>
+
 </div>
-
-
-<!-- JQUERY and BOOTSTRAP -->
-<script src="{% static "riaapp/vendor/jquery/jquery.min.js" %}"></script>
-<script src="{% static "riaapp/vendor/bootstrap/js/bootstrap.bundle.min.js" %}"></script>
-<!-- D3JS -->
-<script src="{% static "riaapp/vendor/d3/d3.js" %}"></script>
-<script src="{% static "riaapp/vendor/d3/d3.min.js" %}"></script>
-<script src="{% static "riaapp/vendor/d3/d3-selection-multi.js" %}"></script>
-<script src="{% static "riaapp/vendor/d3/d3-selection-multi.min.js" %}"></script>
-
-<!-- Argon JS -->
-<script src="{% static "riaapp/js/argon.js" %}"></script>
-
-
-<!-- DisjointGraph JS -->
-<script src="{% static "riaapp/js/drawgraph.js" %}"></script>
-<!-- MYDROPDOWN JS -->
-<script src="{% static "riaapp/js/mydropdownjs.js" %}"></script>
+</div>
+</div>
+{% endblock content %}
 
 
 
 
+{% block javascript %}
 <script type="text/javascript">
 
   $("a").click(function (e) {
@@ -206,50 +84,5 @@
     });
 
   });
-
-  function addReqFunction(){
-    console.log('here')
-    new_req_text = $('#new_req_text').val();
-    $.ajax({
-      url: '/riaapp/addreq/',
-      data: {
-        'req': new_req_text
-      },
-      dataType: 'json',
-      success: function (data) {
-        if (data.successful) {
-          console.log('here2')
-          for (i in data.new_depends)
-          {
-            console.log('here3')
-            $('#deps_table > tbody').append('<tr><td>'+data.new_depends[i] +'</td><td>'+ new_req_text +'</td><td>'+ '<a id="correct_btn" class="btn btn-sm btn-primary" style="background-color: #008000; color: white;">Correct</a><a id="wrong_btn" class="btn btn-sm btn-primary" style="background-color: #DC143C; color: white;">Wrong</a>' +'</td></tr>');
-          }
-          for (i in data.new_influences)
-          {
-            console.log('here4')
-            $('#deps_table > tbody').append('<tr><td>'+ new_req_text +'</td><td>'+ data.new_influences[i] +'</td><td>'+ '<a id="correct_btn" class="btn btn-sm btn-primary" style="background-color: #008000; color: white;">Correct</a><a id="wrong_btn" class="btn btn-sm btn-primary" style="background-color: #DC143C; color: white;">Wrong</a>' +'</td></tr>');
-          }
-        }
-        else {
-          alert("An error occured!");
-        }
-      }
-    });
-  }
-
-
-  $('#new_req_text').keypress(function (e) {
-    if(e.which == 13) {
-      addReqFunction()
-      $('#new_req_text').val("");
-      e.preventDefault();
-    }
-  });
-  $('#new_req_btn').click(function (e) {
-    addReqFunction();
-  });
-
 </script>
-</body>
-
-</html>
+{% endblock javascript %}

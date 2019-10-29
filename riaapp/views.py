@@ -8,8 +8,9 @@ from django.core import serializers
 from django.forms.models import model_to_dict
 import json
 
-from .models import Req, Dep, DepType, DepLearnInstance, NLPDoc
-from .forms import DocumentForm
+from .models import Req, Dep, DepType, DepLearnInstance, NLPDoc, Project, Issue
+
+from .forms import DocumentForm, CreateProjForm
 from .modules.ml_modules.DependencyIdentifier import DependencyIdentifier
 from .modules.graph_modules import Graph_Analysis, REI_Graph_PathAnylsis
 from .modules.utils import LoadData as ld
@@ -20,9 +21,22 @@ max_size = 10
 
 class IndexView(generic.ListView):
     template_name = 'riaapp/index.html'
-    context_object_name = 'reqs'
     def get_queryset(self):
-          return None
+          return  None
+
+
+class CreateProj(generic.ListView):
+    template_name = 'riaapp/create.html'
+    def get_queryset(self):
+          return  None
+
+
+class LoadProj(generic.ListView):
+    template_name = 'riaapp/loadproj.html'
+    context_object_name = 'projs'
+    def get_queryset(self):
+          return  Project.objects.all()
+
 
 
 def loadfile(request):
@@ -42,17 +56,27 @@ def loadfile(request):
     response = {'content': content, 'size': Req.objects.count()}
     return render(request, 'riaapp/index.html', response)
 
+
 def analyze(request):
-    if not DepType.objects.all().exists():
-        thetype = DepType(name=dependency_name)
-        thetype.save()
-        di.dep_type = thetype
-        di.loadDeps()
-        rgraph = Graph_Analysis.ReqGraph()
-        rgraph = Graph_Analysis.calculateNodeDegrees(rgraph)
-        #mainG = REI_Graph_PathAnylsis.importReqsToGraph()
-        #dag = REI_Graph_PathAnylsis.transformToDAG(mainG)
-        #longest_path = REI_Graph_PathAnylsis.getLongestPath(dag)
+    cpf = CreateProjForm(request.POST)
+    if cpf.is_valid():
+        Req.objects.all().delete()
+        DepType.objects.all().delete()
+        new_proj = Project.objects.create(name=cpf.cleaned_data['proj_name'], description=cpf.cleaned_data['proj_desc'])
+        new_proj.save()
+        request.session['proj_id'] = new_proj.id
+    else:
+        if not DepType.objects.all().exists():
+            thetype = DepType(name=dependency_name)
+            thetype.save()
+            di.dep_type = thetype
+            di.loadDeps()
+            rgraph = Graph_Analysis.ReqGraph()
+            rgraph = Graph_Analysis.calculateNodeDegrees(rgraph)
+            request.session['proj_id'] = -2
+            #mainG = REI_Graph_PathAnylsis.importReqsToGraph()
+            #dag = REI_Graph_PathAnylsis.transformToDAG(mainG)
+            #longest_path = REI_Graph_PathAnylsis.getLongestPath(dag)
 
     size_limit = min(Req.objects.all().count(), max_size)
     sortedReqs = Req.objects.all().order_by('-indeg')[:size_limit]
@@ -68,13 +92,18 @@ def searchresults(request):
 
     if isNone or search_terms == []:
         response = {'res': Req.objects.all()}
-        return render(request, 'riaapp/searchresults.html', response)
     else:
         res = Req.objects
         for term in search_terms:
             res = res.filter(text__icontains=term)
         response = {'res': res}
-        return render(request, 'riaapp/searchresults.html', response)
+    
+    return render(request, 'riaapp/searchresults.html', response)
+
+
+def addreqspage(request):
+    return render(request, 'riaapp/addreqspage.html', {})
+
 
 def depslist(request):
     response = {'deps': Dep.objects.all()}

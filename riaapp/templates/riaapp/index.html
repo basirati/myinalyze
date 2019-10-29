@@ -1,128 +1,69 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'riaapp/main_base.html' %}
 
-<head>
+{% block content %}
+<div class="row">
+  <div class="col-lg-10 mx-auto">
+    <h1 class="text-uppercase">
+      <strong>Analyze the Interdependencies of Your Requirements</strong>
+    </h1>
+    <hr>
+  </div>
+  <div class="col-lg-8 mx-auto">
+    <p class="text-faded mb-5">Start by uploading a requirements document, understand how the requirements are interdependent by visualizations and advanced analytics</p>
+    <form id="fileform" method="post" enctype="multipart/form-data" action="{% url 'riaapp:loadfile' %}">
+      {% csrf_token %}
+      <input id="filein" type="file" name="reqs_file" class="btn-primary"/>
+      <input id="submitbtn" type="submit" name="submit" value="Upload" class="btn btn-primary btn-file"/>
+    </form>
+    <br>
+    {% if content %}
+    <p id="status">{{ content }}</p>
+    <p id="dbsize" style="visibility: hidden;">{{ size }}</p>
+    {% endif %}
+    <button id="analyzebtn" class="btn btn-primary" style="width: 100%;">Analyze</button>
+    <br><br>
+    <button id="freshbtn" class="btn btn-primary" style="width: 100%;">Start Fresh by Manually Inserting Requirements</button>
+    <br><br>
+    <div id="myProgressdiv" style="visibility: hidden; width: 100%; background-color: #ddd;">
+      <div id="myBar" style="width: 1%; height: 30px; background-color: #4CAF50;"></div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
 
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="">
-  <meta name="author" content="">
 
-  <title>REINALAYZE</title>
-
-  <!-- Bootstrap core CSS -->
-  <link href="{% static "riaapp/vendor/bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
-
-  <!-- Custom fonts for this template -->
-  <link href="{% static "riaapp/vendor/fontawesome-free/css/all.min.css" %}" rel="stylesheet" type="text/css">
-  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link href='https://fonts.googleapis.com/css?family=Merriweather:400,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
-
-  <!-- Plugin CSS -->
-  <link href="{% static "riaapp/vendor/magnific-popup/magnific-popup.css" %}" rel="stylesheet">
-
-  <!-- Custom styles for this template -->
-  <link href="{% static "riaapp/css/creative.min.css" %}" rel="stylesheet">
-
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-
-</head>
-
-<body id="page-top">
-
-  <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
-    <div class="container">
-      <a class="navbar-brand js-scroll-trigger" href="#page-top">RE.IN.ALAYZE</a>
-      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarResponsive">
-        <ul class="navbar-nav ml-auto">
-        </ul>
+<section class="bg-primary" id="about">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 mx-auto text-center">
+        <h2 class="section-heading text-white">Requirements Interdependency Analyzer</h2>
+        <hr class="light my-4">
+        <p id="recontent" class="text-faded mb-4">RE.IN.Alyze enables you to analyze the interdependencies among your requirements. Acquiring such a knowledge improves your requirements prioritization, system design, test design and system maintenance. Using machine learning techniques, RE.IN.Alyze can be trained on your requirements and your specific self-defined interdependencies in order to provide you a customized abilities.</p> 
       </div>
     </div>
-  </nav>
+  </div>
+</section>
 
-  <header class="masthead text-center text-white d-flex">
-    <div class="container my-auto">
-      <div class="row">
-        <div class="col-lg-10 mx-auto">
-          <h1 class="text-uppercase">
-            <strong>Analyze the Interdependencies of Your Requirements.</strong>
-          </h1>
-          <hr>
-        </div>
-        <div class="col-lg-8 mx-auto">
-          <p class="text-faded mb-5">Start by loading a requirements document, understand how the requirements are inter-dependent by visualizations and advanced analytics.</p>
-          <form id="fileform" method="post" enctype="multipart/form-data" action="{% url 'riaapp:loadfile' %}">
-            {% csrf_token %}
-            <input id="filein" type="file" name="reqs_file" class="btn-primary"/>
-            <input id="submitbtn" type="submit" name="submit" value="Upload" class="btn btn-primary btn-file"/>
-          </form>
-          <br>
-          {% if content %}
-          <p id="status">{{ content }}</p>
-          <p id="dbsize" style="visibility: hidden;">{{ size }}</p>
-          {% endif %}
-          <button id="analyzebtn" class="btn btn-primary" style="width: 100%;">Analyze</button>
-          <br><br>
-          <div id="myProgressdiv" style="visibility: hidden; width: 100%; background-color: #ddd;">
-            <div id="myBar" style="width: 1%; height: 30px; background-color: #4CAF50;"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <section class="bg-primary" id="about">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-8 mx-auto text-center">
-          <h2 class="section-heading text-white">Requirements Interdependency Analyzer</h2>
-          <hr class="light my-4">
-          <p id="recontent" class="text-faded mb-4">RE.IN.Alyze enables you to analyze the interdependencies among your requirements. Acquiring such a knowledge improves your requirements prioritization, system design, test design and system maintenance. Using machine learning techniques, RE.IN.Alyze can be trained on your requirements and your specific self-defined interdependencies in order to provide you a customized abilities.</p> 
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Bootstrap core JavaScript -->
-  <script src="{% static "riaapp/vendor/jquery/jquery.min.js" %}"></script>
-  <script src="{% static "riaapp/vendor/bootstrap/js/bootstrap.bundle.min.js" %}"></script>
-
-  <!-- Plugin JavaScript -->
-  <script src="{% static "riaapp/vendor/jquery-easing/jquery.easing.min.js" %}"></script>
-  <script src="{% static "riaapp/vendor/scrollreveal/scrollreveal.min.js" %}"></script>
-  <script src="{% static "riaapp/vendor/magnific-popup/jquery.magnific-popup.min.js" %}"></script>
-
-  <!-- Custom scripts -->
-  <script src="{% static "riaapp/js/creative.min.js" %}"></script>
-
-  {% block javascript %}
-  <script>
-    $('#analyzebtn').click(function(){
-      dbsize = parseInt($('#dbsize').html());
-      dbsize = dbsize;
-      bar = 0
-      var id = setInterval(frame, 210);
-      $('#myProgressdiv').css("visibility","visible");
-      function frame(){
-        bar = bar + 14;
-        w = Math.ceil(bar / dbsize);
-        if (w >= 100)
-          clearInterval(id);
-        else {
-          $('#myBar').css('width', w+'%');
-          $('#myBar').html(w+'%');
-        }
+{% block javascript %}
+<script>
+  $('#analyzebtn').click(function(){
+    dbsize = parseInt($('#dbsize').html());
+    dbsize = dbsize;
+    bar = 0
+    var id = setInterval(frame, 210);
+    $('#myProgressdiv').css("visibility","visible");
+    function frame(){
+      bar = bar + 14;
+      w = Math.ceil(bar / dbsize);
+      if (w >= 100)
+        clearInterval(id);
+      else {
+        $('#myBar').css('width', w+'%');
+        $('#myBar').html(w+'%');
       }
-      window.location.href = 'analyze';
-    });
-  </script>
-  {% endblock %}
+    }
+    window.location.href = 'analyze';
+  });
+</script>
+{% endblock javascript %}
 
-</body>
-
-</html>

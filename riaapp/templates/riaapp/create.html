@@ -1,0 +1,23 @@
+{% extends 'riaapp/main_base.html' %}
+
+{% block content %}
+<div class="row">
+  <h2 class="text-uppercase" style="margin-left: auto; margin-right: auto;">
+    <strong>Please insert your project name and description</strong>
+  </h2>
+</div>
+
+<form style="margin-top: 5%;" action="{% url 'riaapp:analyze' %}" method="post">
+  {% csrf_token %}
+  <div class="form-group">
+    <label for="proj_name" style="float: left;">Project Name</label>
+    <input type="text" class="form-control" id="proj_name" name="proj_name" placeholder="Enter project name">
+    <!--<small class="form-text text-muted">You can refer</small>-->
+  </div>
+  <div class="form-group">
+    <label for="proj_desc" style="float: left;">Project Description</label>
+    <textarea class="form-control" id="proj_desc" name="proj_desc" rows="3"></textarea>
+  </div>
+  <button type="submit" class="btn btn-primary" style="width: 100%;">Start</button>
+</form>
+{% endblock content %}

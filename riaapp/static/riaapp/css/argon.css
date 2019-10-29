@@ -312,7 +312,9 @@ table.hooverable td:hover{
 	background-color: #dde1ed;
 }
 
-	
+
+
+
 
 caption
 {
@@ -21878,3 +21880,33 @@ html:not([dir='rtl']) .noUi-horizontal .noUi-handle
 
     height: 3px;
 }
+
+
+
+
+
+
+
+.dropdown-menu li:hover {
+	background-color: #dddddd;
+}
+
+.dropdown-menu a:hover {
+	background-color: #dddfff;
+}
+
+
+.dropdown li:hover {
+	background-color: #dddddd;
+}
+
+.dropdown a:hover {
+	background-color: #dddfff;
+}
+
+
+
+
+
+
+

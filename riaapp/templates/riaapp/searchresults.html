@@ -1,227 +1,114 @@
-{% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="Start your development with a Dashboard for Bootstrap 4.">
-  <meta name="author" content="Creative Tim">
-  <title>REINALYZE</title>
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
-  <!-- Icons -->
-  <link href="{% static "riaapp/vendor/nucleo/css/nucleo.css" %}" rel="stylesheet">
-  <link href="{% static "riaapp/vendor/@fortawesome/fontawesome-free/css/all.min.css" %}" rel="stylesheet">
-  <!-- Argon CSS -->
-  <link type="text/css" href="{% static "riaapp/css/argon.css" %}" rel="stylesheet">
-  <!-- mydropdown CSS -->
-  <link type="text/css" href="{% static "riaapp/css/mydropdown.css" %}" rel="stylesheet">
-</head>
-
-<body>
-  <!-- Sidenav -->
-  <nav class="navbar navbar-vertical fixed-left navbar-expand-md navbar-light bg-white" id="sidenav-main">
-    <div class="container-fluid">
-      <!-- Toggler -->
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#sidenav-collapse-main" aria-controls="sidenav-main" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <!-- Brand -->
-      <a class="navbar-brand pt-0" href="{% url 'riaapp:index' %}">
-        <img src="{% static "riaapp/img/brand/blue.png" %}" class="navbar-brand-img" alt="logo">
-      </a>
-      <!-- Collapse -->
-      <div class="collapse navbar-collapse" id="sidenav-collapse-main">
-        <!-- Navigation -->
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'riaapp:analyze' %}">
-              <i class="ni ni-tv-2 text-primary"></i> Overview
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'riaapp:depslist' %}">
-              <i class="ni ni-planet text-blue"></i> Dependencies
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'riaapp:searchresults' %}">
-              <i class="ni ni-pin-3 text-orange"></i> Requirements
-            </a>
-          </li>
-        </ul>
-        <!-- Divider -->
-        <hr class="my-3">
-        <h6 class="navbar-heading text-muted"></h6>
-        <ul class="navbar-nav mb-md-3">
-          <li class="nav-item">
-            <a class="nav-link" href="">
-            </a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-
-  <!-- Main content -->
-  <div class="main-content">
-    <!-- Top navbar -->
-    <nav class="navbar navbar-top navbar-expand-md navbar-dark" id="navbar-main">
-      <div class="container">
-        <div class="row">
-          <!-- Form -->
-          <span class="col-sm" style="color: white">Search Requirement</span>
-          <form class="navbar-search navbar-search-dark" action="{% url 'riaapp:searchresults' %}" method="GET">
-            <input name='search_string' class="form-control" placeholder="Search" type="text">
-          </form>
-          <span class="col-sm" style="color: white">Interdependency Types</span>
-          <span class="col-sm">
-            <dl class="dropdown"> 
-              <dt>
-                <a href="#">
-                  <p class="multiSel"></p>  
-                </a>
-              </dt>
-              <dd>
-                <div class="mutliSelect">
-                  <ul>
-                  </ul>
-                </div>
-              </dd>
-            </dl>
-          </span>
+{% extends 'riaapp/admin_base.html' %}
+{% block content %}
+<div class="card-deck" style="margin-right: 0.5%; margin-left: 0.5%; margin-top: 0.5%">
+  <div class="card shadow">
+    <div class="card-header border-0">
+      <div class="row align-items-center">
+        <div class="col">
+          <h3 class="mb-0">Search Results</h3>
         </div>
-      </div>
-    </nav>
-
-    <!-- Page content -->
-    <div class="header bg-gradient-primary pb-2 pt-md-8">
-    </div>
-
-    <div class="card-deck" style="margin-right: 0.5%; margin-left: 0.5%; margin-top: 0.5%">
-      <div class="card shadow">
-        <div class="card-header border-0">
-          <div class="row align-items-center">
-            <div class="col">
-              <h3 class="mb-0">Search Results</h3>
-            </div>
-            <div class="col text-right">
-            </div>
-          </div>
-        </div>
-        <div class="table-responsive">
-          <table id="reqs_table" class="table align-items-center hooverable">
-            <thead class="thead-light">
-              <tr>
-                <th scope="col" style="cursor: auto;">Requirement</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for r in res %}
-              <tr>
-                <td hidden="true">
-                  {{r.id}}
-                </td>
-                <td class="clickable_req_cell" style="word-wrap: break-word; word-break: break-all; white-space: normal;">
-                  {{r.text}}
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+        <div class="col text-right">
         </div>
       </div>
     </div>
-    <div class="card-deck" style="margin: 1%;">
-      <div class="card shadow">
-        <div class="card-header border-0">
-          <div class="row align-items-center">
-            <div class="col">
-              <h3 class="mb-0">Influencing On</h3>
-            </div>
-            <div class="col text-right">
-            </div>
-          </div>
-        </div>
-        <div class="table-responsive">
-          <table class="table align-items-center table-flush">
-            <thead class="thead-light">
-              <tr>
-                <th scope="col">Requirement</th>
-              </tr>
-            </thead>
-            <tbody id="influencing_tbody">
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div class="card shadow">
-        <div class="card-header border-0">
-          <div class="row align-items-center">
-            <div class="col">
-              <h3 class="mb-0">Depending On</h3>
-            </div>
-            <div class="col text-right">
-            </div>
-          </div>
-        </div>
-        <div class="table-responsive">
-          <table class="table align-items-center table-flush">
-            <thead class="thead-light">
-              <tr>
-                <th scope="col">Requirement</th>
-              </tr>
-            </thead>
-            <tbody id="depending_tbody">
-            </tbody>
-          </table>
-        </div>
-      </div>
+    <div class="table-responsive">
+      <table id="reqs_table" class="table align-items-center hooverable">
+        <thead class="thead-light">
+          <tr>
+            <th scope="col" style="cursor: auto;">Requirement</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in res %}
+          <tr>
+            <td hidden="true">
+              {{r.id}}
+            </td>
+            <td class="clickable_req_cell" style="word-wrap: break-word; word-break: break-all; white-space: normal;">
+              {{r.text}}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
   </div>
+</div>
+<div class="card-deck" style="margin: 1%;">
+  <div class="card shadow">
+    <div class="card-header border-0">
+      <div class="row align-items-center">
+        <div class="col">
+          <h3 class="mb-0">Influencing On</h3>
+        </div>
+        <div class="col text-right">
+        </div>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table align-items-center table-flush">
+        <thead class="thead-light">
+          <tr>
+            <th scope="col">Requirement</th>
+          </tr>
+        </thead>
+        <tbody id="influencing_tbody">
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card shadow">
+    <div class="card-header border-0">
+      <div class="row align-items-center">
+        <div class="col">
+          <h3 class="mb-0">Depending On</h3>
+        </div>
+        <div class="col text-right">
+        </div>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table align-items-center table-flush">
+        <thead class="thead-light">
+          <tr>
+            <th scope="col">Requirement</th>
+          </tr>
+        </thead>
+        <tbody id="depending_tbody">
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</div>
 
-  
-  <!-- JQUERY and BOOTSTRAP -->
-  <script src="{% static "riaapp/vendor/jquery/jquery.min.js" %}"></script>
-  <script src="{% static "riaapp/vendor/bootstrap/js/bootstrap.bundle.min.js" %}"></script>
-  <!-- D3JS -->
-  <script src="{% static "riaapp/vendor/d3/d3.js" %}"></script>
-  <script src="{% static "riaapp/vendor/d3/d3.min.js" %}"></script>
-  <script src="{% static "riaapp/vendor/d3/d3-selection-multi.js" %}"></script>
-  <script src="{% static "riaapp/vendor/d3/d3-selection-multi.min.js" %}"></script>
+{% endblock content %}
+{% block javascript %}
 
-  <!-- Argon JS -->
-  <script src="{% static "riaapp/js/argon.js" %}"></script>
-
-
-  <!-- DisjointGraph JS -->
-  <script src="{% static "riaapp/js/drawgraph.js" %}"></script>
-  <!-- MYDROPDOWN JS -->
-  <script src="{% static "riaapp/js/mydropdownjs.js" %}"></script>
-
-  <script type="text/javascript">
-    $(".clickable_req_cell").click(function(e) {
-      req_id = e.currentTarget.parentElement.children[0].innerText.trim();
-      $.ajax({
-        url: '/riaapp/getreqdeps/',
-        data: {
-          'req_id': req_id,
-        },
-        dataType: 'json',
-        success: function (data) {
-          $("#influencing_tbody").empty();
-          for (i in data.influencing) {
-            $("#influencing_tbody").append("<tr><td>" + data.influencing[i] + "</td></tr>");
-          }
-          $("#depending_tbody").empty();
-          for (i in data.depending) {
-            $("#depending_tbody").append("<tr><td>" + data.depending[i] + "</td></tr>");
-          }
+<script type="text/javascript">
+  $(".clickable_req_cell").click(function(e) {
+    req_id = e.currentTarget.parentElement.children[0].innerText.trim();
+    $.ajax({
+      url: '/riaapp/getreqdeps/',
+      data: {
+        'req_id': req_id,
+      },
+      dataType: 'json',
+      success: function (data) {
+        $("#influencing_tbody").empty();
+        for (i in data.influencing) {
+          $("#influencing_tbody").append("<tr><td>" + data.influencing[i] + "</td></tr>");
         }
-      });
+        $("#depending_tbody").empty();
+        for (i in data.depending) {
+          $("#depending_tbody").append("<tr><td>" + data.depending[i] + "</td></tr>");
+        }
+      }
     });
+  });
 
-  </script>
+</script>
+{% endblock javascript %}
 </body>
 
 </html>

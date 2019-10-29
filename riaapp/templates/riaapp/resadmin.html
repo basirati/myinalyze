@@ -1,251 +1,81 @@
-{% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="Start your development with a Dashboard for Bootstrap 4.">
-  <meta name="author" content="Creative Tim">
-  <title>REINALYZE</title>
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
-  <!-- Icons -->
-  <link href="{% static "riaapp/vendor/nucleo/css/nucleo.css" %}" rel="stylesheet">
-  <link href="{% static "riaapp/vendor/@fortawesome/fontawesome-free/css/all.min.css" %}" rel="stylesheet">
-  <!-- Argon CSS -->
-  <link type="text/css" href="{% static "riaapp/css/argon.css" %}" rel="stylesheet">
-  <!-- mydropdown CSS -->
-  <link type="text/css" href="{% static "riaapp/css/mydropdown.css" %}" rel="stylesheet">
-</head>
-
-<body>
-  <!-- Sidenav -->
-  <nav class="navbar navbar-vertical fixed-left navbar-expand-md navbar-light bg-white" id="sidenav-main">
-    <div class="container-fluid">
-      <!-- Toggler -->
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#sidenav-collapse-main" aria-controls="sidenav-main" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <!-- Brand -->
-      <a class="navbar-brand pt-0" href="{% url 'riaapp:index' %}">
-        <img src="{% static "riaapp/img/brand/blue.png" %}" class="navbar-brand-img" alt="logo">
-      </a>
-      <!-- Collapse -->
-      <div class="collapse navbar-collapse" id="sidenav-collapse-main">
-        <!-- Navigation -->
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'riaapp:analyze' %}">
-              <i class="ni ni-tv-2 text-primary"></i> Overview
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'riaapp:depslist' %}">
-              <i class="ni ni-planet text-blue"></i> Dependencies
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'riaapp:searchresults' %}">
-              <i class="ni ni-pin-3 text-orange"></i> Requirements
-            </a>
-          </li>
-        </ul>
-        <!-- Divider -->
-        <hr class="my-3">
-        <h6 class="navbar-heading text-muted"></h6>
-        <ul class="navbar-nav mb-md-3">
-          <li class="nav-item">
-            <a class="nav-link" href="">
-            </a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-
-  <!-- Main content -->
-  <div class="main-content">
-    <!-- Top navbar -->
-    <nav class="navbar navbar-top navbar-expand-md navbar-dark" id="navbar-main">
-      <div class="container">
-        <div class="row">
-          <!-- Form -->
-          <span class="col-sm" style="color: white">Search Requirement</span>
-          <form id="search_form" class="navbar-search navbar-search-dark" action="{% url 'riaapp:searchresults' %}" method="GET">
-            <input name='search_string' class="form-control" placeholder="Search" type="text">
-          </form>
-          <span class="col-sm" style="color: white">Interdependency Types</span>
-          <span class="col-sm">
-            <dl class="dropdown"> 
-              <dt>
-                <a href="#">
-                  <p class="multiSel"></p>  
-                </a>
-              </dt>
-              <dd>
-                <div class="mutliSelect">
-                  <ul>
-                  </ul>
-                </div>
-              </dd>
-            </dl>
-          </span>
-        </div>
-      </div>
-    </nav>
-
-
-
-    <div class="header bg-gradient-primary pb-2 pt-md-8">
-    </div>
-    <!-- Page content -->
-    <div class="container-fluid pb-5" style="margin-top: 2%;">
-      <div class="row" style="margin-top: 3% margin: 0 auto; white-space: nowrap;">
-        <textarea id="new_req_text" style="width:65%" placeholder="Write a new requirement here ..."></textarea>
-        <a id="new_req_btn" href="#!" class="btn btn-primary" style=" margin-left: 2%; vertical-align: middle; ">Add New Requirement</a>
-        <a id="scrollgraph_btn" href="#graphviz" class="btn btn-outline-primary" style=" margin-left: 1%; vertical-align: middle; ">Graph Visualization</a>
-      </div>
-      <div class="row" style="margin: 1% auto;">
-        <div class="table-responsive">
-          <table id="reqs_table" class="table align-items-center table-hover">
-            <thead class="thead-light">
-              <tr>
-                <th scope="col" style="cursor: auto;">
-                  Requirement Specification
-                  <span style="margin-left: 2%;">
-                    <a id="seeallreqs_btn" href="{% url 'riaapp:searchresults' %}" class="btn btn-sm btn-primary" >See All Requirements</a>
-                    <a id="seealldeps_btn" href="{% url 'riaapp:depslist' %}" class="btn btn-sm btn-primary">See All Dependencies</a>  
-                  </span>
-                </th>
-                <th scope="col">Depending On <br> (Number of Requirements)</th>
-                <th scope="col">Influencing On <br> (Number of Requirements)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for r in sortedReqs %}
-              <tr>
-                <th hidden="true">
-                  {{r.id}}
-                </th>
-                <th scope="row" style="word-wrap: break-word; word-break: break-all; white-space: normal;">
-                  {{r.text}}
-                </th>
-                <td>
-                  {{r.indeg}}
-                </td>
-                <td>
-                  {{r.outdeg}}
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <!-- mt--7 -->
-    <div id="graph_container" class="container-fluid" style="margin-bottom: 20px;">
-      <div class="row">
-        <div class="col-xl-12 mb-5 mb-xl-0">
-          <div class="card bg-gradient-default shadow">
-            <div class="card-header bg-transparent">
-              <div class="row align-items-center">
-                <div class="col">
-                  <h6 id="presentation_type" class="text-uppercase text-light ls-1 mb-1">Graph Presentation</h6>
-                </div>
-                <div class="col">
-                  <ul class="nav nav-pills justify-content-end">
-                    <li id="graphbtn" class="nav-item mr-2 mr-md-0">
-                      <button type="button" class="btn btn-primary">(Re)Load Graph</button>
-                    </li>
-                    <li id="totop_btn" class="nav-item mr-2 mr-md-0">
-                      <button type="button" class="btn btn-secondary">Back To Top</button>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            <div class="card-body">
-              <div class="chart" style="height: 800px">
-                <svg width=100% height=100% style="border-style: solid; border-width: medium;"></svg>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-    
-    <div id="popcontent" style="display: none;">
-      <div class="card" style="width: 25rem;">
-        <div class="card-body">
-          <h5 class="card-title">Influences on</h5>
-          <table class="table" style="display: block; max-height: 250px; overflow-y: scroll;">
-            <tbody id="influencing_pop_tbody">
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="card" style="width: 25rem;">
-        <div class="card-body">
-          <h5 class="card-title">Depends on</h5>
-          <table class="table" style="display: block; max-height: 250px; block; overflow-y: scroll;">
-            <tbody id="depending_pop_tbody" >
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-
+{% extends 'riaapp/admin_base.html' %}
+{% block content %}
+<div class="row" style="margin-top: 3% margin: 0 auto; white-space: nowrap;">
+  <textarea id="new_req_text" style="width:65%" placeholder="Write a new requirement here ..."></textarea>
+  <a id="new_req_btn" href="#!" class="btn btn-primary" style=" margin-left: 2%; vertical-align: middle; ">Add New Requirement</a>
+  <a id="scrollgraph_btn" href="#graphviz" class="btn btn-outline-primary" style=" margin-left: 1%; vertical-align: middle; ">Graph Visualization</a>
+</div>
+<div class="row" style="margin: 1% auto;">
+  <div class="table-responsive">
+    <table id="reqs_table" class="table align-items-center table-hover">
+      <thead class="thead-light">
+        <tr>
+          <th scope="col" style="cursor: auto;">
+            Requirement Specification
+            <span style="margin-left: 2%;">
+              <a id="seeallreqs_btn" href="{% url 'riaapp:searchresults' %}" class="btn btn-sm btn-primary" >See All Requirements</a>
+              <a id="seealldeps_btn" href="{% url 'riaapp:depslist' %}" class="btn btn-sm btn-primary">See All Dependencies</a>  
+            </span>
+          </th>
+          <th scope="col">Depending On <br> (Number of Requirements)</th>
+          <th scope="col">Influencing On <br> (Number of Requirements)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in sortedReqs %}
+        <tr>
+          <th hidden="true">
+            {{r.id}}
+          </th>
+          <th scope="row" style="word-wrap: break-word; word-break: break-all; white-space: normal;">
+            {{r.text}}
+          </th>
+          <td>
+            {{r.indeg}}
+          </td>
+          <td>
+            {{r.outdeg}}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
+</div>
+{% include "riaapp/graph.html" %}
+{% endblock content %}
+
+{% block javascript %}
+<script>
+  $('#scrollgraph_btn').click(function(){
+    scrollingElement = (document.scrollingElement || document.body);
+    $(scrollingElement).animate({
+      scrollTop: $('#graph_container').position().top
+    }, 500);
+  });
 
 
-  <!-- JQUERY and BOOTSTRAP -->
-  <script src="{% static "riaapp/vendor/jquery/jquery.min.js" %}"></script>
-  <script src="{% static "riaapp/vendor/bootstrap/js/bootstrap.bundle.min.js" %}"></script>
-  <!-- D3JS -->
-  <script src="{% static "riaapp/vendor/d3/d3.js" %}"></script>
-  <script src="{% static "riaapp/vendor/d3/d3.min.js" %}"></script>
-  <script src="{% static "riaapp/vendor/d3/d3-selection-multi.js" %}"></script>
-  <script src="{% static "riaapp/vendor/d3/d3-selection-multi.min.js" %}"></script>
+  $(document).click(function() {
+    $('#reqs_table > tbody > tr > th').popover('hide');
+  });
 
-  <!-- Argon JS -->
-  <script src="{% static "riaapp/js/argon.js" %}"></script>
-
-
-  <!-- DisjointGraph JS -->
-  <script src="{% static "riaapp/js/drawgraph.js" %}"></script>
-  <!-- MYDROPDOWN JS -->
-  <script src="{% static "riaapp/js/mydropdownjs.js" %}"></script>
-
-
-
-
-
-  <script type="text/javascript">
-    $(document).click(function() {
-      $('#reqs_table > tbody > tr > th').popover('hide');
+  $('#reqs_table > tbody > tr > th').click(function(e) {
+    e.stopPropagation();
+    req_id = e.currentTarget.parentElement.children[0].innerText;
+    $('#reqs_table > tbody > tr > th').popover('hide');
+    $(e.target).popover({
+      html: true,
+      content: function() {
+        return $('#popcontent').html();
+      },
     });
-
-    $('#reqs_table > tbody > tr > th').click(function(e) {
-      e.stopPropagation();
-      req_id = e.currentTarget.parentElement.children[0].innerText;
-      $('#reqs_table > tbody > tr > th').popover('hide');
-      $(e.target).popover({
-        html: true,
-        content: function() {
-          return $('#popcontent').html();
-        },
-    });
-      $.ajax({
-        url: '/riaapp/getreqdeps/',
-        data: {
-          'req_id': req_id,
-        },
-        dataType: 'json',
-        success: function (data) {
+    $.ajax({
+      url: '/riaapp/getreqdeps/',
+      data: {
+        'req_id': req_id,
+      },
+      dataType: 'json',
+      success: function (data) {
         $("#influencing_pop_tbody").empty();
         for (i in data.influencing) {
           $("#influencing_pop_tbody").append("<tr><td>" + data.influencing[i] + "</td></tr>");
@@ -258,112 +88,89 @@
         last_target = e.target;
         $('.popover').css('left', e.clientX + 'px');
         $('.popover').css('top', e.clientY + 'px')
-        }
-    });
-    });
-
-    function addReqFunction(){
-
-      new_req_text = $('#new_req_text').val();
-      $.ajax({
-        url: '/riaapp/addreq/',
-        data: {
-          'req': new_req_text
-        },
-        dataType: 'json',
-        success: function (data) {
-          if (data.successful) {
-            $('#reqs_table > tbody').empty();
-            var flag = false;
-            for (i in data.sortedReqs)
-            {
-              r = JSON.parse(data.sortedReqs[i]);
-              if (r.text == new_req_text) { flag = true; }
-              $('#reqs_table > tbody').append('<tr><th>'+r.text+'</th><td>'+ r.indeg +'</td><td>'+ r.outdeg +'</td></tr>');
-            }
-            if (flag == false) {
-              $('#reqs_table > tbody:last-child').append('<tr><th>'+ JSON.parse(data.new_req).id +'</th><th>' + JSON.parse(data.new_req).text+'</th><td>' + JSON.parse(data.new_req).indeg + '</td><td>'+ JSON.parse(data.new_req).outdeg +'</td></tr>');
-            }
-          }
-          else {
-            alert("An error occured!");
-          }
-        }
-      });
-    }
-
-    $('#search_input').keypress(function (e) {
-      console.log($('#search_input').val());
-    });
-
-    $('#new_req_text').keypress(function (e) {
-      if(e.which == 13) {
-        addReqFunction()
-        $('#new_req_text').val("");
-        e.preventDefault();
       }
     });
-    $('#new_req_btn').click(function (e) {
-      addReqFunction();
-    });
+  });
 
-    $('#totop_btn').click(function(){
-      scrollingElement = (document.scrollingElement || document.body);
-      $(scrollingElement).animate({
-        scrollTop: 0
-      }, 500);
-    });
+  function addReqFunction(){
 
-    $('#scrollgraph_btn').click(function(){
-      scrollingElement = (document.scrollingElement || document.body);
-      $(scrollingElement).animate({
-        scrollTop: $('#graph_container').position().top
-      }, 500);
-    });
-
-    $('#graphbtn').click(function() {
-      $('#presentation_type').html("Graph Presentation");
-      d3.select("svg").selectAll("*").remove();
-      $.get('/riaapp/getallreqsanddeps/', {}, function(data){
-        nodes = [];
-        for (var i = 0; i < data.jreqs.length; i++) {
-          nodes.push({name: JSON.parse(data.jreqs[i]).text, outdeg: JSON.parse(data.jreqs[i]).outdeg, id: i+1});
-        }
-        links = [];
-        for (var i = 0; i < data.jdeps.length; i++) {
-          s = data.jdeps[i].source;
-          d = data.jdeps[i].destination;
-          si = -1; di = -1;
-          for (var j = 0; j < nodes.length; j++) {
-            if (nodes[j].name == s)
-              si = nodes[j].id
-            if (nodes[j].name == d)
-              di = nodes[j].id
-            if (si > -1 && di > -1)
-              break;
+    new_req_text = $('#new_req_text').val();
+    $.ajax({
+      url: '/riaapp/addreq/',
+      data: {
+        'req': new_req_text
+      },
+      dataType: 'json',
+      success: function (data) {
+        if (data.successful) {
+          $('#reqs_table > tbody').empty();
+          var flag = false;
+          for (i in data.sortedReqs)
+          {
+            r = JSON.parse(data.sortedReqs[i]);
+            if (r.text == new_req_text) { flag = true; }
+            $('#reqs_table > tbody').append('<tr><th>'+r.text+'</th><td>'+ r.indeg +'</td><td>'+ r.outdeg +'</td></tr>');
           }
-          links.push({source: si, target: di, type: "depends on"});
+          if (flag == false) {
+            $('#reqs_table > tbody:last-child').append('<tr><th>'+ JSON.parse(data.new_req).id +'</th><th>' + JSON.parse(data.new_req).text+'</th><td>' + JSON.parse(data.new_req).indeg + '</td><td>'+ JSON.parse(data.new_req).outdeg +'</td></tr>');
+          }
         }
-        all = {};
-        all["nodes"] = nodes;
-        all["links"] = links;
-        drawDJGraph(all, d3.select("svg"));
-      });
+        else {
+          alert("An error occured!");
+        }
+      }
     });
+  }
 
-    $('#pathbtn').click(function() {
-      $('#presentation_type').html("Path Presentation");
-      $.get('/riaapp/getlp/', {}, function(data){
+  $('#new_req_text').keypress(function (e) {
+    if(e.which == 13) {
+      addReqFunction()
+      $('#new_req_text').val("");
+      e.preventDefault();
+    }
+  });
+  $('#new_req_btn').click(function (e) {
+    addReqFunction();
+  });
 
 
-      });
+  $('#graphbtn').click(function() {
+    $('#presentation_type').html("Graph Presentation");
+    d3.select("svg").selectAll("*").remove();
+    $.get('/riaapp/getallreqsanddeps/', {}, function(data){
+      nodes = [];
+      for (var i = 0; i < data.jreqs.length; i++) {
+        nodes.push({name: JSON.parse(data.jreqs[i]).text, outdeg: JSON.parse(data.jreqs[i]).outdeg, id: i+1});
+      }
+      links = [];
+      for (var i = 0; i < data.jdeps.length; i++) {
+        s = data.jdeps[i].source;
+        d = data.jdeps[i].destination;
+        si = -1; di = -1;
+        for (var j = 0; j < nodes.length; j++) {
+          if (nodes[j].name == s)
+            si = nodes[j].id
+          if (nodes[j].name == d)
+            di = nodes[j].id
+          if (si > -1 && di > -1)
+            break;
+        }
+        links.push({source: si, target: di, type: "depends on"});
+      }
+      all = {};
+      all["nodes"] = nodes;
+      all["links"] = links;
+      drawDJGraph(all, d3.select("svg"));
     });
+  });
 
-    $('#rankbtn').click(function() {
-      $('#presentation_type').html("Ranking Table Presentation");
-      d3.select("svg").selectAll("*").remove();
-    });
-  </script>
-</body>
+  $('#totop_btn').click(function(){
+    scrollingElement = (document.scrollingElement || document.body);
+    $(scrollingElement).animate({
+      scrollTop: 0
+    }, 500);
+  });
+</script>
 
-</html>
+
+{% endblock javascript %}

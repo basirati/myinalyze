@@ -1,4 +1,4 @@
-from ...models import Req, NLPDoc, DepLearnInstance
+from ...models import Req, NLPDoc, DepLearnInstance, Issue, Project
 from . import PreProcessing as pp
 from ..ml_modules import Feature_Extraction as fe
 
@@ -24,12 +24,16 @@ def loadReqs(doc):
         return False
     
 
-def addReq(txt):
+def addReq(txt, issue_id, proj_id):
     try:
         doc = fe.nlp(txt)
         doc_bytes = doc.to_bytes()
         the_nlp_doc = NLPDoc(doc = doc_bytes)
         the_nlp_doc.save()
+        the_issue = None
+        if issue_id == None or issue_id == -1:
+            the_issue = Issue(proj = proj_id)
+        
         new_req = Req(text = txt, nlp_doc = the_nlp_doc)
         new_req.save()
         return new_req

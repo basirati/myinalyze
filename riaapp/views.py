@@ -18,6 +18,7 @@ from .modules.utils import LoadData as ld
 dependency_name = 'relates'
 di = DependencyIdentifier(None)
 max_size = 10
+temp_proj = "the_temp_project"
 
 class IndexView(generic.ListView):
     template_name = 'riaapp/index.html'
@@ -45,12 +46,16 @@ def loadfile(request):
         form = DocumentForm(request.POST, request.FILES)
         if form.is_valid():
             doc = request.FILES['reqs_file']
-            Req.objects.all().delete()
-            DepType.objects.all().delete()
-            Dep.objects.all().delete()
-            NLPDoc.objects.all().delete()
-            DepLearnInstance.objects.all().delete()
-            ld.loadReqs(doc)
+            projs = Project.objects.filter(name=temp_proj)
+            if projs.count() < 1:
+                the_proj = Project.objects.create(name=temp_proj, description='This project is used to serve the show case.')
+                the_proj.save()
+            else:
+                the_proj = projs[0]
+                ld.emptyProj(the_proj)
+
+            request.session['proj_id'] = the_proj.id
+            ld.loadReqs(doc, the_proj)
     else:
         content = "Uploading File Failed!"
     response = {'content': content, 'size': Req.objects.count()}
@@ -59,9 +64,8 @@ def loadfile(request):
 
 def analyze(request):
     cpf = CreateProjForm(request.POST)
+    #also can be recognized by if we already have temp_proj in the session or not
     if cpf.is_valid():
-        Req.objects.all().delete()
-        DepType.objects.all().delete()
         new_proj = Project.objects.create(name=cpf.cleaned_data['proj_name'], description=cpf.cleaned_data['proj_desc'])
         new_proj.save()
         request.session['proj_id'] = new_proj.id
@@ -73,7 +77,6 @@ def analyze(request):
             di.loadDeps()
             rgraph = Graph_Analysis.ReqGraph()
             rgraph = Graph_Analysis.calculateNodeDegrees(rgraph)
-            request.session['proj_id'] = -2
             #mainG = REI_Graph_PathAnylsis.importReqsToGraph()
             #dag = REI_Graph_PathAnylsis.transformToDAG(mainG)
             #longest_path = REI_Graph_PathAnylsis.getLongestPath(dag)
@@ -104,6 +107,17 @@ def searchresults(request):
 def addreqspage(request):
     return render(request, 'riaapp/addreqspage.html', {})
 
+def getProjbyID(proj_id):
+    the_proj = None
+    if proj_id != None and proj_id > 0:
+        the_proj = Project.objects.get(pk=proj_id)
+    return the_proj
+
+
+def projconfig(request):
+    proj_id = request.session.get('proj_id')
+    return render(request, 'riaapp/projectconfig.html', {'proj': getProjbyID(proj_id)})
+
 
 def depslist(request):
     response = {'deps': Dep.objects.all()}
@@ -130,7 +144,9 @@ def resadmin(request):
 
 def addReq(request):
     new_req_text = request.GET.get('req', None)
-    new_req = ld.addReq(new_req_text)
+    issue_id = request.GET.get('issue', None)
+    proj_id = request.session.get('proj_id')
+    new_req = ld.addReq(new_req_text, issue_id, getProjbyID(proj_id))
     if new_req != None:
         new_deps = di.updateDepsByNewReq(new_req)
         new_req.indeg = Graph_Analysis.calNodeInDegree(new_req)
@@ -190,3 +206,10 @@ def getLP(request):
     res = {'path': longest_path}
     return JsonResponse(res)
 
+def resetAll(request):
+    Req.objects.all().delete()
+    DepType.objects.all().delete()
+    Dep.objects.all().delete()
+    NLPDoc.objects.all().delete()
+    DepLearnInstance.objects.all().delete()
+    return JsonResponse({'successful': True})

@@ -1,0 +1,37 @@
+{% extends 'riaapp/admin_base.html' %}
+{% block content %}
+
+<h1><strong>{{proj.name|default_if_none:"Test Project"}}</strong></h1>
+
+<div>
+	<p>Reset all settings, remove all types, requirements and data.</p>
+	<button id="reset_btn" class="btn btn-primary" style="width: 100%;">RESET</button>
+</div>
+
+{% endblock content %}
+{% block javascript %}
+
+<script type="text/javascript">
+	$('#reset_btn').click(function(){
+		$.ajax({
+			url: '/riaapp/reset/',
+			data: {
+				'reset': true
+			},
+			dataType: 'json',
+			success: function (data) {
+				if (data.successful) {
+					alert("All data is successfully deleted!")
+					window.location.href = "{% url 'riaapp:index' %}";
+				}
+				else {
+					alert("An error occured!");
+				}
+			}
+		});
+	});
+	</script>
+	{% endblock javascript %}
+</body>
+
+</html>

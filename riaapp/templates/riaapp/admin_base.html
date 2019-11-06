@@ -133,6 +133,12 @@
       </div>
     </div>
 
+    <footer  style="position: fixed; bottom: 0px; margin-bottom: 0px; width: 100%; display: flex; justify-content: center; align-items: center;">
+
+          {% block footer %}
+          {% endblock footer %}
+
+    </footer>
 
   </div>
 
@@ -158,8 +164,8 @@
 
 
 
-{% block javascript %}
-{% endblock javascript %}
+  {% block javascript %}
+  {% endblock javascript %}
 </body>
 
 </html>

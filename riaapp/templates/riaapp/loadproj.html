@@ -12,6 +12,7 @@
       <tr>
         <th scope="col" style="cursor: auto;">Project Name</th>
         <th scope="col">Project Description</th>
+        <th scope="col"></th>
       </tr>
     </thead>
     <tbody>
@@ -26,9 +27,42 @@
         <td>
           {{p.description}}
         </td>
+        <td>
+          <a class="btn btn-primary btn_del" href="">Delete</a>
+        </td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
 {% endblock content %}
+
+{% block javascript %}
+<script>
+  $('#projs_table > tbody > tr').click(function(e){
+    proj_id = e.currentTarget.children[0].innerText.trim();
+    window.location.href = "{% url 'riaapp:analyze' %}?id="+proj_id;
+  });
+
+
+  $('.btn_del').click(function(e){
+    proj_id = e.currentTarget.parentElement.parentElement.children[0].innerText.trim();
+    del = confirm("Are you sure you want to delete the project?");
+    if (del == false) {
+      return;
+    }
+    $.ajax({
+      url: '/riaapp/delproj/',
+      data: {
+        'proj_id': proj_id
+      },
+      dataType: 'json',
+      success: function (data) {
+        e.currentTarget.parentElement.parentElement.delete();
+      }
+    });
+  });
+  
+
+</script>
+{% endblock javascript %}

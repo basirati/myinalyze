@@ -22,7 +22,7 @@
     {% endif %}
     <button id="analyzebtn" class="btn btn-primary" style="width: 100%;">Analyze</button>
     <br><br>
-    <button id="freshbtn" class="btn btn-primary" style="width: 100%;">Start Fresh by Manually Inserting Requirements</button>
+    <a class="btn btn-primary" style="width: 100%;" href="{% url 'riaapp:analyze' %}?fresh=True" value="True">Start Fresh by Manually Inserting Requirements</a>
     <br><br>
     <div id="myProgressdiv" style="visibility: hidden; width: 100%; background-color: #ddd;">
       <div id="myBar" style="width: 1%; height: 30px; background-color: #4CAF50;"></div>
@@ -62,8 +62,9 @@
         $('#myBar').html(w+'%');
       }
     }
-    window.location.href = 'analyze';
+    window.location.href = "{% url 'riaapp:analyze' %}?fresh=False";
   });
+
 </script>
 {% endblock javascript %}
 

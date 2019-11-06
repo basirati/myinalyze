@@ -3,13 +3,36 @@ from . import PreProcessing as pp
 from ..ml_modules import Feature_Extraction as fe
 
 
-
 def getReqsByProj(the_proj):
-    res = []
+    if the_proj == None:
+        return None
+    res = None
     issues = Issue.objects.filter(proj=the_proj)
+    first = True
     for iss in issues:
-        res = res + Req.objects.filter(issue=iss)
-    res = set(res)
+        if first:
+            res = Req.objects.filter(issue=iss)
+        else:
+            res = res | Req.objects.filter(issue=iss)
+        first = False
+    return res
+
+
+def getDepsByProj(the_proj):
+    print('here')
+    if the_proj == None:
+        return None
+    print(the_proj.id)
+    res = None
+    types = DepType.objects.filter(proj=the_proj)
+    print(types.count())
+    first = True
+    for t in types:
+        if first:
+            res = Dep.objects.filter(dep_type=t)
+        else:
+            res = res | Dep.objects.filter(dep_type=t)
+        first = False
     return res
 
 def emptyProj(the_proj):

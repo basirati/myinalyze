@@ -16,7 +16,6 @@ from .modules.graph_modules import Graph_Analysis, REI_Graph_PathAnylsis
 from .modules.utils import LoadData as ld
 
 dependency_name = 'relates'
-di = DependencyIdentifier(None)
 max_size = 10
 temp_proj = "the_temp_project"
 
@@ -64,52 +63,76 @@ def loadfile(request):
 
 def analyze(request):
     cpf = CreateProjForm(request.POST)
-    #also can be recognized by if we already have temp_proj in the session or not
     if cpf.is_valid():
         new_proj = Project.objects.create(name=cpf.cleaned_data['proj_name'], description=cpf.cleaned_data['proj_desc'])
         new_proj.save()
         request.session['proj_id'] = new_proj.id
     else:
-        if not DepType.objects.all().exists():
-            thetype = DepType(name=dependency_name)
-            thetype.save()
-            di.dep_type = thetype
-            di.loadDeps()
-            rgraph = Graph_Analysis.ReqGraph()
-            rgraph = Graph_Analysis.calculateNodeDegrees(rgraph)
+        isFresh = request.GET.get('fresh')
+        if isFresh == None:
+            proj_id = request.GET.get('id')
+            if proj_id != None:
+                request.session['proj_id'] = int(proj_id)
+        else:
+            if isFresh == 'True':
+                request.session['proj_id'] = Project.objects.filter(name=temp_proj)[0].id
+            elif isFresh == 'False':
+                the_proj = getProjbyID(request.session['proj_id'])
+                thetype = DepType(name=dependency_name, proj=the_proj)
+                thetype.save()
+                di = DependencyIdentifier(thetype)
+                di.loadDeps()
+                rgraph = Graph_Analysis.ReqGraph()
+                rgraph = Graph_Analysis.calculateNodeDegrees(rgraph)
             #mainG = REI_Graph_PathAnylsis.importReqsToGraph()
             #dag = REI_Graph_PathAnylsis.transformToDAG(mainG)
             #longest_path = REI_Graph_PathAnylsis.getLongestPath(dag)
-
-    size_limit = min(Req.objects.all().count(), max_size)
-    sortedReqs = Req.objects.all().order_by('-indeg')[:size_limit]
+            
+    the_proj = getProjbyID(request.session['proj_id'])
+    sortedReqs = ld.getReqsByProj(the_proj)
+    #size_limit = min(Req.objects.all().count(), max_size)
+    #sortedReqs = Req.objects.all().order_by('-indeg')[:size_limit]
+    
     response = {'sortedReqs': sortedReqs}
     return render(request, 'riaapp/resadmin.html', response)
 
 
 def searchresults(request):
     search_terms = request.GET.get('search_string')
-    isNone = False
-    if search_terms == None:
-        isNone = True
 
-    if isNone or search_terms == []:
-        response = {'res': Req.objects.all()}
-    else:
-        res = Req.objects
+    the_proj = getProjbyID(request.session['proj_id'])
+    res = ld.getReqsByProj(the_proj)
+    
+    if (not search_terms == None) and (not search_terms == []):
         for term in search_terms:
             res = res.filter(text__icontains=term)
-        response = {'res': res}
     
+    response = {'res': res}
     return render(request, 'riaapp/searchresults.html', response)
 
 
 def addreqspage(request):
-    return render(request, 'riaapp/addreqspage.html', {})
+    res = {}
+    if request.method == 'POST':
+        form = DocumentForm(request.POST, request.FILES)
+        if form.is_valid():
+            doc = request.FILES['reqs_file']
+            the_proj = getProjbyID(request.session['proj_id'])
+            ld.loadReqs(doc, the_proj)
+            res = {'msg': 'Successfully added!'}
+        else:
+            res = {'msg': 'Something went wrong!'}
+    return render(request, 'riaapp/addreqspage.html', res)
 
 def getProjbyID(proj_id):
-    the_proj = None
-    if proj_id != None and proj_id > 0:
+    if proj_id == None:
+        return None
+    try:
+        proj_id += 0
+    except TypeError:
+        proj_id = int(proj_id)
+    the_proj = None        
+    if proj_id > 0:
         the_proj = Project.objects.get(pk=proj_id)
     return the_proj
 
@@ -120,7 +143,7 @@ def projconfig(request):
 
 
 def depslist(request):
-    response = {'deps': Dep.objects.all()}
+    response = {'deps': ld.getDepsByProj(getProjbyID(request.session['proj_id']))}
     return render(request, 'riaapp/depslist.html', response)
 
 def addLearnInstance(request):
@@ -212,4 +235,12 @@ def resetAll(request):
     Dep.objects.all().delete()
     NLPDoc.objects.all().delete()
     DepLearnInstance.objects.all().delete()
+    Project.objects.all().delete()
+    return JsonResponse({'successful': True})
+
+def deleteProj(request):
+    proj_id = request.GET.get('proj_id', None)
+    the_proj = getProjbyID(proj_id)
+    ld.emptyProj(the_proj)
+    the_proj.delete()
     return JsonResponse({'successful': True})

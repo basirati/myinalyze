@@ -1,13 +1,37 @@
 {% extends 'riaapp/admin_base.html' %}
 {% block content %}
 
-<h1>This is TEST</h1>
+<div>
+  <h3>You can upload and add your requirements from file to the project.</h3>
+  <br>
+  <form id="fileform" method="post" enctype="multipart/form-data" action="{% url 'riaapp:addreqspage' %}">
+    {% csrf_token %}
+    <input id="filein" type="file" name="reqs_file" class="btn-primary"/>
+    <input id="submitbtn" type="submit" name="submit" value="Upload" class="btn btn-primary btn-file"/>
+  </form>
+  <p>{{msg}}</p>
+</div>
+<br>
+<hr>
+<br>
+<div class="row" style="margin-top: 3% margin: 0 auto; white-space: nowrap;">
+  <h3>You can simply write and add your requirements to the project.</h3>
+  <br/>
+  <br/>
+  <textarea id="new_req_text" style="width:75%" placeholder="Write a new requirement here ..." rows="5"></textarea>
+  <a id="new_req_btn" href="#!" class="btn btn-primary" style=" margin-left: 2%; display: table-cell; vertical-align: middle; text-align: center;">Add New Requirement</a>
+</div>
 
 {% endblock content %}
-{% block javascript %}
 
+{% block footer %}
+<a class="btn btn-primary" style="width: 100%; " href="{% url 'riaapp:analyze' %}?fresh=True" value="True">Update Interdependencies</a>
+{% endblock footer %}
+
+
+{% block javascript %}
 <script type="text/javascript">
-  </script>
+</script>
 {% endblock javascript %}
 </body>
 

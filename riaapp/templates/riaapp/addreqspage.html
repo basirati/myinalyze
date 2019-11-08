@@ -18,8 +18,9 @@
   <h3>You can simply write and add your requirements to the project.</h3>
   <br/>
   <br/>
-  <textarea id="new_req_text" style="width:75%" placeholder="Write a new requirement here ..." rows="5"></textarea>
-  <a id="new_req_btn" href="#!" class="btn btn-primary" style=" margin-left: 2%; display: table-cell; vertical-align: middle; text-align: center;">Add New Requirement</a>
+  <div style="width: 100%; display: flex; justify-content: center; align-items: center;">
+    {%include 'riaapp/AddBar.html' %}
+  </div>
 </div>
 
 {% endblock content %}
@@ -31,6 +32,18 @@
 
 {% block javascript %}
 <script type="text/javascript">
+  //if (addReqFunction($('#new_req_text').val(), true))
+  $('#new_req_btn').click(function (e) {
+    txt = $('#new_req_text').val();
+    type = $('#issue_type_dd').val();
+    priority = $('#priority_dd').val();
+    effort = $('#effort_input').val();
+    res = addIssueFunction(txt, priority, type, effort, false);
+    console.log(res);
+    if (res == true) {
+      alert('Successfully added!');
+    }
+  });
 </script>
 {% endblock javascript %}
 </body>

@@ -1,9 +1,8 @@
 {% extends 'riaapp/admin_base.html' %}
 {% block content %}
 <div class="row" style="margin-top: 3% margin: 0 auto; white-space: nowrap;">
-  <textarea id="new_req_text" style="width:65%" placeholder="Write a new requirement here ..."></textarea>
-  <a id="new_req_btn" href="#!" class="btn btn-primary" style=" margin-left: 2%; vertical-align: middle; ">Add New Requirement</a>
-  <a id="scrollgraph_btn" href="#graphviz" class="btn btn-outline-primary" style=" margin-left: 1%; vertical-align: middle; ">Graph Visualization</a>
+  {%include 'riaapp/AddBar.html' %}
+  <a id="scrollgraph_btn" href="#graphviz" class="col col-lg-1 btn btn-outline-primary" style="text-align: center; white-space: normal; padding-right: 0; padding-left: 0;">Graph Visualization</a>
 </div>
 <div class="row" style="margin: 1% auto;">
   <div class="table-responsive">
@@ -92,45 +91,27 @@
     });
   });
 
-  function addReqFunction(){
-
-    new_req_text = $('#new_req_text').val();
-    $.ajax({
-      url: '/riaapp/addreq/',
-      data: {
-        'req': new_req_text
-      },
-      dataType: 'json',
-      success: function (data) {
-        if (data.successful) {
-          $('#reqs_table > tbody').empty();
-          var flag = false;
-          for (i in data.sortedReqs)
-          {
-            r = JSON.parse(data.sortedReqs[i]);
-            if (r.text == new_req_text) { flag = true; }
-            $('#reqs_table > tbody').append('<tr><th>'+r.text+'</th><td>'+ r.indeg +'</td><td>'+ r.outdeg +'</td></tr>');
-          }
-          if (flag == false) {
-            $('#reqs_table > tbody:last-child').append('<tr><th>'+ JSON.parse(data.new_req).id +'</th><th>' + JSON.parse(data.new_req).text+'</th><td>' + JSON.parse(data.new_req).indeg + '</td><td>'+ JSON.parse(data.new_req).outdeg +'</td></tr>');
-          }
-        }
-        else {
-          alert("An error occured!");
-        }
-      }
-    });
-  }
 
   $('#new_req_text').keypress(function (e) {
     if(e.which == 13) {
-      addReqFunction()
-      $('#new_req_text').val("");
+      txt = $('#new_req_text').val();
+      priority = $('#priority_dd').val();
+      type = $('#issue_type_dd').val();
+      effort = $('#effort_input').val();
+      if (addIssueFunction(txt, priority, type, effort, true)) {
+        $('#new_req_text').val("");  
+      }
       e.preventDefault();
     }
   });
   $('#new_req_btn').click(function (e) {
-    addReqFunction();
+    txt = $('#new_req_text').val();
+    priority = $('#priority_dd').val();
+    type = $('#issue_type_dd').val();
+    effort = $('#effort_input').val();
+    if (addIssueFunction(txt, priority, type, effort, true)) {
+      $('#new_req_text').val("");  
+    }
   });
 
 

@@ -1,0 +1,5 @@
+Emergency stop button must be provided at multiple locations that should be easily accessible to the operators
+An emergency stop button must be integrated with PPU to halt the operations safely without causing any damage to the system in case of emergency.
+The PPU must be able to operate safely and securely
+Any component or live wore without recommended insulation carrying current above safety limits should not be exposed to the outside environment.
+The PPU components must not be manufactured by any toxic substance.

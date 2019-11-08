@@ -165,33 +165,47 @@ def resadmin(request):
     response = {'reqs': Req.objects.all()}
     return render(request, 'riaapp/resadmin.html', response)
 
-def addReq(request):
+def addIssue(request):
     new_req_text = request.GET.get('req', None)
-    issue_id = request.GET.get('issue', None)
-    proj_id = request.session.get('proj_id')
-    new_req = ld.addReq(new_req_text, issue_id, getProjbyID(proj_id))
-    if new_req != None:
-        new_deps = di.updateDepsByNewReq(new_req)
-        new_req.indeg = Graph_Analysis.calNodeInDegree(new_req)
-        new_req.outdeg = Graph_Analysis.calNodeOutDegree(new_req)
-        new_req.save()
-        
-        size_limit = min(Req.objects.all().count(), max_size)
+    priority = request.GET.get('priority', None)
+    issue_type = request.GET.get('type', None)
+    effort = request.GET.get('effort', None)
+
+    the_proj = getProjbyID(request.session.get('proj_id'))
+    new_issue = ld.addIssue(new_req_text, priority, issue_type, effort, the_proj)
+
+    #should I always update dependencies after I added a new issue?
+    if new_issue != None:
+        new_reqs = Req.objects.filter(issue=new_issue)
+        thetype = None
+        types = DepType.objects.filter(proj=the_proj)
+        if types.count() > 0:
+            thetype = types[0]
+        di = DependencyIdentifier(thetype)
+
+        new_deps = []
+        for req in new_reqs:
+            new_deps = new_deps + di.updateDepsByNewReq(req)
+            req.indeg = Graph_Analysis.calNodeInDegree(req)
+            req.outdeg = Graph_Analysis.calNodeOutDegree(req)
+            req.save(update_fields=['indeg', 'outdeg'])
+
+        all_reqs = ld.getReqsByProj(the_proj)
+        size_limit = min(all_reqs.count(), max_size)
         sortedReqs = []
-        for r in Req.objects.all().order_by('-indeg')[:size_limit]:
+        for r in all_reqs.order_by('-indeg')[:size_limit]:
             sortedReqs.append(json.dumps(model_to_dict(r)))
         new_depends_txt = []
         new_influences_txt = []
         for d in new_deps:
-            if d.source == new_req:
+            if d.source in new_reqs:
                 new_influences_txt.append(d.destination.text)
             else:
                 new_depends_txt.append(d.source.text)
-        new_req_json = json.dumps(model_to_dict(new_req))
-        res = {'successful': True, 'sortedReqs': sortedReqs, 'new_depends': new_depends_txt, 'new_influences': new_influences_txt,'new_req':new_req_json}
+        new_issue_json = json.dumps(model_to_dict(new_issue))
+        res = {'successful': True, 'sortedReqs': sortedReqs, 'new_depends': new_depends_txt, 'new_influences': new_influences_txt,'new_issue':new_issue_json}
     else:
         res = {'successful': False}
-    
     return JsonResponse(res)
 
 def getAllReqsAndDeps(request):

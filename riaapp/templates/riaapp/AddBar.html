@@ -1,0 +1,38 @@
+
+<textarea id="new_req_text" class="col col-lg-7" rows="3" placeholder="Write a new requirement here ..."></textarea>
+
+
+<div class="col col-lg-1">
+  <div class="row" style="margin-bottom: 5%">
+    <div class="col">
+      <select id='issue_type_dd' class="btn btn-secondary dropdown-toggle">
+        <option class="dropdown-item" value="task">Task</option>
+        <option class="dropdown-item" value="story">Story</option>
+        <option class="dropdown-item" value="bug">Bug</option>
+        <option class="dropdown-item" value="epic">Epic</option>
+      </select>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <select id='priority_dd' class="btn btn-secondary dropdown-toggle">
+        <option class="dropdown-item" value="1">1</option>
+        <option class="dropdown-item" value="2">2</option>
+        <option class="dropdown-item" value="3">3</option>
+      </select>
+    </div>
+  </div>
+
+</div>
+
+<div class="col col-lg-1"> 
+  <label style="text-align: center; font-style: italic; font-size: 1em;">STORY <br/> POINTS</label>
+  <div class="row">
+    <div class="col">
+      <input id="effort_input" type="number" class="col" value="10" min="1" max="100" step="1"/>
+    </div>
+  </div>
+</div>
+
+
+<a id="new_req_btn" class="col btn btn-primary" style="margin-left: 1%; vertical-align: middle; color: white;">Add New Requirement</a>

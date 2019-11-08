@@ -19,13 +19,13 @@ class Project(models.Model):
 
 class Issue(models.Model):
 	proj = models.ForeignKey(Project, related_name='+', on_delete=models.CASCADE, null=True)
-#	Category
+	issue_type = models.CharField(max_length=80, default='task')
+	priority = models.IntegerField(default = 1)
+	effort = models.IntegerField(default = 1)
+
 #	created_by
 #	assigned_to [text]
-#	Reqs []
 #	main_req	maybe
-#	priority
-#	
 
 
 #

@@ -74,13 +74,14 @@
   <div class="main-content">
     <!-- Top navbar -->
     <nav class="navbar navbar-top navbar-expand-md navbar-dark" id="navbar-main">
-      <div class="container">
+      <div class="container" style="display: flex; justify-content: center; align-items: center;">
         <div class="row">
           <!-- Form -->
-          <span class="col-sm" style="color: white">Search Requirement</span>
+          <span class="col-sm" style="color: white; margin-top: 2%">Search Requirement</span>
           <form id="search_form" class="navbar-search navbar-search-dark" action="{% url 'riaapp:searchresults' %}" method="GET">
             <input name='search_string' class="form-control" placeholder="Search" type="text">
           </form>
+          <!--
           <span class="col-sm" style="color: white">Interdependency Types</span>
           <span class="col-sm">
             <dl class="dropdown"> 
@@ -96,7 +97,7 @@
                 </div>
               </dd>
             </dl>
-          </span>
+          </span>-->
         </div>
       </div>
     </nav>
@@ -133,7 +134,7 @@
       </div>
     </div>
 
-    <footer  style="position: fixed; bottom: 0px; margin-bottom: 0px; width: 100%; display: flex; justify-content: center; align-items: center;">
+    <footer  style="position: fixed; bottom: 0px; margin-bottom: 1%; width: 100%; display: flex; justify-content: center; align-items: center;">
 
           {% block footer %}
           {% endblock footer %}
@@ -160,6 +161,8 @@
   <script src="{% static "riaapp/js/drawgraph.js" %}"></script>
   <!-- MYDROPDOWN JS -->
   <script src="{% static "riaapp/js/mydropdownjs.js" %}"></script>
+  <!-- JS functions for admin pages -->
+  <script src="{% static "riaapp/js/ria_admin.js" %}"></script>
 
 
 

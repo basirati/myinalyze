@@ -67,27 +67,34 @@ def loadReqs(doc, proj):
         return False
     
 
-def addReq(txt, issue_id, proj):
+def addIssue(txt, priority, itype, effort, proj):
     try:
-        doc = fe.nlp(txt)
+        if txt == None:
+            return None
+        the_issue = Issue(proj = proj, priority=priority, issue_type=itype, effort=effort)
+        the_issue.save()
+
+        docs = fe.nlp(txt)
+        for sent in docs.sents:
+            doc = sent.as_doc()
+            addReqbyDoc(doc, the_issue)
+
+        return the_issue
+    except Exception as e:
+        print('@addIssue: ', str(e))
+        return None
+
+
+def addReqbyDoc(doc, issue):
+    try:
         doc_bytes = doc.to_bytes()
         the_nlp_doc = NLPDoc(doc = doc_bytes)
         the_nlp_doc.save()
-
-        the_issue = None
-        #from django.shortcuts import get_object_or_404
-        #comment = get_object_or_404(Comment, pk=comment_id)
-        if issue_id == None or issue_id == -1:
-            the_issue = Issue(proj = proj)
-            the_issue.save()
-        else:
-            the_issue = Issue.objects.get(pk=issue_id)
-
-        new_req = Req(text = txt, nlp_doc = the_nlp_doc, issue = the_issue)
+        new_req = Req(text = doc.text, nlp_doc = the_nlp_doc, issue = issue)
         new_req.save()
         return new_req
     except Exception as e:
-        print(str(e))
+        print('@addReqByDoc: ', str(e))
         return None
 
 

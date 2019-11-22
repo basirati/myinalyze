@@ -21,19 +21,19 @@
         </tr>
       </thead>
       <tbody>
-        {% for r in sortedReqs %}
+        {% for iss in sortedReqs %}
         <tr>
           <th hidden="true">
-            {{r.id}}
+            {{iss.id}}
           </th>
           <th scope="row" style="word-wrap: break-word; word-break: break-all; white-space: normal;">
-            {{r.text}}
+            {{iss.text}}
           </th>
           <td>
-            {{r.indeg}}
+            {{iss.indeg}}
           </td>
           <td>
-            {{r.outdeg}}
+            {{iss.outdeg}}
           </td>
         </tr>
         {% endfor %}
@@ -121,21 +121,12 @@
     $.get('/riaapp/getallreqsanddeps/', {}, function(data){
       nodes = [];
       for (var i = 0; i < data.jreqs.length; i++) {
-        nodes.push({name: JSON.parse(data.jreqs[i]).text, outdeg: JSON.parse(data.jreqs[i]).outdeg, id: i+1});
+        nodes.push({name: JSON.parse(data.jreqs[i]).text, outdeg: JSON.parse(data.jreqs[i]).outdeg, id: JSON.parse(data.jreqs[i]).id});
       }
       links = [];
       for (var i = 0; i < data.jdeps.length; i++) {
-        s = data.jdeps[i].source;
-        d = data.jdeps[i].destination;
-        si = -1; di = -1;
-        for (var j = 0; j < nodes.length; j++) {
-          if (nodes[j].name == s)
-            si = nodes[j].id
-          if (nodes[j].name == d)
-            di = nodes[j].id
-          if (si > -1 && di > -1)
-            break;
-        }
+        si = data.jdeps[i].source;
+        di = data.jdeps[i].destination;
         links.push({source: si, target: di, type: "depends on"});
       }
       all = {};

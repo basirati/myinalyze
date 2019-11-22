@@ -9,7 +9,7 @@ from . import Feature_Extraction as fe
 from ..utils import PreProcessing as pp
 from ..utils import LoadData as ld
 
-from ...models import Req, Dep, DepType, DepLearnInstance
+from ...models import Req, Dep, DepType, DepLearnInstance, Issue
 
 class DependencyIdentifier:
     clf = None
@@ -64,6 +64,17 @@ class DependencyIdentifier:
                     new_dep = Dep(dep_type=self.dep_type, source = r1, destination = r2)
                     new_dep.save()
 
+    def loadDepIssues(self):
+        for issue1 in Issue.objects.all():
+            for issue2 in Issue.objects.all():
+                if issue1 == issue2:
+                    continue
+                count = self.identifyDepOfIssues(issue1, issue2)
+                if count > 0:
+                    new_depissue = DepIssue(dep_type=self.dep_type, source=issue1, destination=issue2, count=count)
+                    new_depissue.save()
+
+
     def updateDepsByNewReq(self, new_req):
         new_deps = []
         new_r_doc = pp.getDocFromBytes(new_req.nlp_doc.doc)
@@ -78,6 +89,61 @@ class DependencyIdentifier:
                 new_dep.save()
                 new_deps.append(new_dep)
         return new_deps
+
+
+    def updateDepsbyNewIssue(self, new_issue):
+        new_reqs = Req.objects.filter(issue=new_issue)
+        new_deps = []
+        for new_r in new_reqs:
+            new_deps += self.updateDepsByNewReq(new_r)
+        related_issues_to = set()
+        related_issues_from = set()
+        for nd in new_deps:
+            if nd.source == new_issue:
+                related_issues_to.add(nd.destination)
+            elif nd.destination == new_issue:
+                related_issues_from.add(nd.source)
+            else:
+                print('@updateDepsbyNewIssue: Strange Dependency')
+
+
+        new_deps = []
+        for issue in related_issues_to:
+            count = self.identifyDepOfIssues(new_issue, issue)
+            if count > 0:
+                new_depissue = Dep(dep_type =self.dep_type, source = new_issue, destination = issue, count=count)
+                new_depissue.save()
+                new_deps.append(new_depissue)
+
+        for issue in related_issues_from:
+            count = self.identifyDepOfIssues(issue, new_issue)
+            if count > 0:
+                new_depissue = Dep(dep_type =self.dep_type, source = issue, destination = new_issue, count=count)
+                new_depissue.save()
+                new_deps.append(new_depissue)
+
+        return new_deps
+
+
+
+
+    def identifyDepOfIssues(self, issue1, issue2, dept_type):
+        reqs1 = Req.objects.fliter(issue = issue1)
+        reqs2 = Req.objects.fliter(issue = issue2)
+        count = 0
+        for r1 in reqs1:
+            for r2 in reqs2:
+                try:
+                    res = Dep.objects.get(dep_type=dep_type, source=r1, destination=r2)
+                    count += 1
+                except Dep.DoesNotExist:
+                    res = None
+        threshold = (reqs1.count() + reqs2.count()) / 3
+        if count >= threshold:
+            return count
+        else:
+            return -1
+
 
 
     def identifyOBJ(self, req1, req2):

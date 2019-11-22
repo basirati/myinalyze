@@ -60,7 +60,8 @@ def loadReqs(doc, proj):
                 line_txt = line.decode("utf-8")
             else:
                 line_txt = line
-            addReq(line_txt, -1, proj)
+            #Inja bayad avaz she, alan line be line mirim jolo, vali kolan bayad issue by issue bashe, yani paragraph be paragraph
+            addIssue(line_txt, 1, 'Task', 5, proj)
         return True
     except Exception as e:
         print(str(e))
@@ -71,7 +72,7 @@ def addIssue(txt, priority, itype, effort, proj):
     try:
         if txt == None:
             return None
-        the_issue = Issue(proj = proj, priority=priority, issue_type=itype, effort=effort)
+        the_issue = Issue(text=txt, proj = proj, priority=priority, issue_type=itype, effort=effort)
         the_issue.save()
 
         docs = fe.nlp(txt)

@@ -8,7 +8,7 @@ from django.core import serializers
 from django.forms.models import model_to_dict
 import json
 
-from .models import Req, Dep, DepType, DepLearnInstance, NLPDoc, Project, Issue
+from .models import Req, Dep, DepType, DepLearnInstance, NLPDoc, Project, Issue, DepIssue
 
 from .forms import DocumentForm, CreateProjForm
 from .modules.ml_modules.DependencyIdentifier import DependencyIdentifier
@@ -82,14 +82,14 @@ def analyze(request):
                 thetype.save()
                 di = DependencyIdentifier(thetype)
                 di.loadDeps()
-                rgraph = Graph_Analysis.ReqGraph()
-                rgraph = Graph_Analysis.calculateNodeDegrees(rgraph)
+                #rgraph = Graph_Analysis.ReqGraph()
+                #rgraph = Graph_Analysis.calculateNodeDegrees(rgraph)
             #mainG = REI_Graph_PathAnylsis.importReqsToGraph()
             #dag = REI_Graph_PathAnylsis.transformToDAG(mainG)
             #longest_path = REI_Graph_PathAnylsis.getLongestPath(dag)
             
     the_proj = getProjbyID(request.session['proj_id'])
-    sortedReqs = ld.getReqsByProj(the_proj)
+    sortedReqs = Issue.objects.filter(proj=the_proj)
     #size_limit = min(Req.objects.all().count(), max_size)
     #sortedReqs = Req.objects.all().order_by('-indeg')[:size_limit]
     
@@ -209,15 +209,18 @@ def addIssue(request):
     return JsonResponse(res)
 
 def getAllReqsAndDeps(request):
-    rs = []
+    iss = []
     ds = []
     if request.method == 'GET':
-        for r in Req.objects.all():
-            rs.append(json.dumps(model_to_dict(r)))
-        for d in Dep.objects.all():
-            tmp = {'source': d.source.text, 'destination': d.destination.text}
+        the_proj = getProjbyID(request.session.get('proj_id'))
+        for issue in Issue.objects.filter(proj=the_proj):
+            iss.append(json.dumps(model_to_dict(issue)))
+        #this line should be changed for having multiple types
+        the_type = DepType.objects.filter(proj=the_proj)[0]
+        for d in DepIssue.objects.filter(dep_type=the_type):
+            tmp = {'source': str(d.id), 'destination': str(d.id)}
             ds.append(tmp)
-    res = {'jreqs': rs, 'jdeps': ds}
+    res = {'jreqs': iss, 'jdeps': ds}
     return JsonResponse(res)
 
 def getReqDeps(request):
@@ -247,6 +250,8 @@ def resetAll(request):
     Req.objects.all().delete()
     DepType.objects.all().delete()
     Dep.objects.all().delete()
+    Issue.objects.all().delete()
+    DepIssue.objects.all().delete()
     NLPDoc.objects.all().delete()
     DepLearnInstance.objects.all().delete()
     Project.objects.all().delete()

@@ -18,10 +18,15 @@ class Project(models.Model):
 
 
 class Issue(models.Model):
+	text = models.CharField(max_length=2000, default="Empty")
 	proj = models.ForeignKey(Project, related_name='+', on_delete=models.CASCADE, null=True)
 	issue_type = models.CharField(max_length=80, default='task')
 	priority = models.IntegerField(default = 1)
 	effort = models.IntegerField(default = 1)
+	indeg = models.IntegerField(default = -1)
+	outdeg = models.IntegerField(default = -1)
+	def __str__(self):
+		return self.text
 
 #	created_by
 #	assigned_to [text]
@@ -35,9 +40,7 @@ class NLPDoc(models.Model):
 
 class Req(models.Model):
 	issue = models.ForeignKey(Issue, related_name='+', on_delete=models.CASCADE, null=True, default=None)
-	text = models.CharField(max_length=2000)
-	indeg = models.IntegerField(default = -1)
-	outdeg = models.IntegerField(default = -1)
+	text = models.CharField(max_length=200)
 	nlp_doc =  models.ForeignKey(NLPDoc, related_name='+', on_delete=models.CASCADE, null=True)
 	def __str__(self):
 		return self.text
@@ -48,6 +51,14 @@ class DepType(models.Model):
 	directional = models.BooleanField(default=True)
 	def __str__(self):
 		return self.name
+
+
+class DepIssue(models.Model):
+	dep_type = models.ForeignKey(DepType, related_name='+', on_delete=models.CASCADE, null=True)
+	source = models.ForeignKey(Issue, related_name='+', on_delete=models.CASCADE)
+	destination = models.ForeignKey(Issue, related_name='+', on_delete=models.CASCADE) 
+	count = models.IntegerField(default = 0)
+
 
 
 class Dep(models.Model):

@@ -9,7 +9,8 @@ from . import Feature_Extraction as fe
 from ..utils import PreProcessing as pp
 from ..utils import LoadData as ld
 
-from ...models import Req, Dep, DepType, DepLearnInstance, Issue
+from ...models import Req, Dep, DepType, DepLearnInstance, Issue, DepIssue
+from ...modules.graph_modules import Graph_Analysis
 
 class DependencyIdentifier:
     clf = None
@@ -99,10 +100,10 @@ class DependencyIdentifier:
         related_issues_to = set()
         related_issues_from = set()
         for nd in new_deps:
-            if nd.source == new_issue:
-                related_issues_to.add(nd.destination)
-            elif nd.destination == new_issue:
-                related_issues_from.add(nd.source)
+            if nd.source in new_reqs:
+                related_issues_to.add(nd.destination.issue)
+            elif nd.destination in new_reqs:
+                related_issues_from.add(nd.source.issue)
             else:
                 print('@updateDepsbyNewIssue: Strange Dependency')
 
@@ -111,34 +112,35 @@ class DependencyIdentifier:
         for issue in related_issues_to:
             count = self.identifyDepOfIssues(new_issue, issue)
             if count > 0:
-                new_depissue = Dep(dep_type =self.dep_type, source = new_issue, destination = issue, count=count)
+                new_depissue = DepIssue(dep_type =self.dep_type, source = new_issue, destination = issue, count=count)
                 new_depissue.save()
                 new_deps.append(new_depissue)
 
         for issue in related_issues_from:
             count = self.identifyDepOfIssues(issue, new_issue)
             if count > 0:
-                new_depissue = Dep(dep_type =self.dep_type, source = issue, destination = new_issue, count=count)
+                new_depissue = DepIssue(dep_type =self.dep_type, source = issue, destination = new_issue, count=count)
                 new_depissue.save()
                 new_deps.append(new_depissue)
 
+        new_issue.indeg = Graph_Analysis.calNodeInDegree(new_issue)
+        new_issue.outdeg = Graph_Analysis.calNodeOutDegree(new_issue)
+        new_issue.save(update_fields=['indeg', 'outdeg'])
         return new_deps
 
 
 
 
-    def identifyDepOfIssues(self, issue1, issue2, dept_type):
-        reqs1 = Req.objects.fliter(issue = issue1)
-        reqs2 = Req.objects.fliter(issue = issue2)
+    def identifyDepOfIssues(self, issue1, issue2):
+        reqs1 = Req.objects.filter(issue = issue1)
+        reqs2 = Req.objects.filter(issue = issue2)
         count = 0
         for r1 in reqs1:
             for r2 in reqs2:
-                try:
-                    res = Dep.objects.get(dep_type=dep_type, source=r1, destination=r2)
+                if Dep.objects.filter(dep_type=self.dep_type, source=r1, destination=r2).exists():
                     count += 1
-                except Dep.DoesNotExist:
-                    res = None
         threshold = (reqs1.count() + reqs2.count()) / 3
+        print('@', count, threshold, issue1, issue2)
         if count >= threshold:
             return count
         else:

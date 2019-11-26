@@ -1,3 +1,4 @@
+import datetime
 from django.db import models
 from .modules.utils import PreProcessing as pp
 from django.db.models.query_utils import DeferredAttribute
@@ -18,11 +19,15 @@ class Project(models.Model):
 
 
 class Issue(models.Model):
+	title = models.CharField(max_length=200, default="No Title") 
 	text = models.CharField(max_length=2000, default="Empty")
 	proj = models.ForeignKey(Project, related_name='+', on_delete=models.CASCADE, null=True)
 	issue_type = models.CharField(max_length=80, default='task')
 	priority = models.IntegerField(default = 1)
+	status = models.CharField(max_length=50, default="ToDo")
 	effort = models.IntegerField(default = 1)
+	creator = models.CharField(max_length=200, default="Someone")
+	created_date = models.DateField(default=datetime.date.today)
 	indeg = models.IntegerField(default = -1)
 	outdeg = models.IntegerField(default = -1)
 	def __str__(self):
@@ -58,6 +63,8 @@ class DepIssue(models.Model):
 	source = models.ForeignKey(Issue, related_name='+', on_delete=models.CASCADE)
 	destination = models.ForeignKey(Issue, related_name='+', on_delete=models.CASCADE) 
 	count = models.IntegerField(default = 0)
+	def __str__(self):
+		return "{" + self.dep_type.name + "} : from [" + self.source.text + "] to [" + self.destination.text + "]"
 
 
 

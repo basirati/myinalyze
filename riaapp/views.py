@@ -82,8 +82,9 @@ def analyze(request):
                 thetype.save()
                 di = DependencyIdentifier(thetype)
                 di.loadDeps()
-                #rgraph = Graph_Analysis.ReqGraph()
-                #rgraph = Graph_Analysis.calculateNodeDegrees(rgraph)
+                di.loadDepIssues()
+                rgraph = Graph_Analysis.ReqGraph()
+                rgraph = Graph_Analysis.calculateNodeDegrees(rgraph)
             #mainG = REI_Graph_PathAnylsis.importReqsToGraph()
             #dag = REI_Graph_PathAnylsis.transformToDAG(mainG)
             #longest_path = REI_Graph_PathAnylsis.getLongestPath(dag)
@@ -101,7 +102,7 @@ def searchresults(request):
     search_terms = request.GET.get('search_string')
 
     the_proj = getProjbyID(request.session['proj_id'])
-    res = ld.getReqsByProj(the_proj)
+    res = Issue.objects.filter(proj=the_proj)
     
     if (not search_terms == None) and (not search_terms == []):
         for term in search_terms:
@@ -143,17 +144,21 @@ def projconfig(request):
 
 
 def depslist(request):
-    response = {'deps': ld.getDepsByProj(getProjbyID(request.session['proj_id']))}
+    response = {'deps': ld.getDepIssuesByProj(getProjbyID(request.session['proj_id']))}
     return render(request, 'riaapp/depslist.html', response)
 
 def addLearnInstance(request):
     dep_id = request.GET.get('dep_id', None)
-    the_dep = Dep.objects.get(pk=dep_id)
+    try:
+        the_dep = DepIssue.objects.get(pk=dep_id)
+    except DepIssue.DoesNotExist:
+        the_dep = None
     the_positive = True if request.GET.get('positive', None) == 'true' else False
     if the_dep != None:
-        existing_learn = DepLearnInstance.objects.filter(r1=the_dep.source.text).filter(r2=the_dep.destination.text)
+        existing_learn = DepLearnInstance.objects.filter(r1=the_dep.source.text, r2=the_dep.destination.text)
         if len(existing_learn) == 0 :
-            learn = DepLearnInstance.objects.create(dep_type=the_dep.dep_type, r1=the_dep.source.text, r2=the_dep.destination.text, positive=the_positive)
+            learn = DepLearnInstance.objects.create(r1=the_dep.source.text, r2=the_dep.destination.text, positive=the_positive)
+            learn.dep_types.add(the_dep.dep_type)
             learn.save()
         else:
             existing_learn[0].positive = the_positive
@@ -173,39 +178,13 @@ def addIssue(request):
 
     the_proj = getProjbyID(request.session.get('proj_id'))
     new_issue = ld.addIssue(new_req_text, priority, issue_type, effort, the_proj)
+    #inja bayad type ro bara multiple type doros kard
+    thetype = DepType.objects.filter(proj=the_proj)[0]
+    di = DependencyIdentifier(thetype)
+    new_deps = di.updateDepsbyNewIssue(new_issue)
+    new_issue_json = json.dumps(model_to_dict(new_issue))
 
-    #should I always update dependencies after I added a new issue?
-    if new_issue != None:
-        new_reqs = Req.objects.filter(issue=new_issue)
-        thetype = None
-        types = DepType.objects.filter(proj=the_proj)
-        if types.count() > 0:
-            thetype = types[0]
-        di = DependencyIdentifier(thetype)
-
-        new_deps = []
-        for req in new_reqs:
-            new_deps = new_deps + di.updateDepsByNewReq(req)
-            req.indeg = Graph_Analysis.calNodeInDegree(req)
-            req.outdeg = Graph_Analysis.calNodeOutDegree(req)
-            req.save(update_fields=['indeg', 'outdeg'])
-
-        all_reqs = ld.getReqsByProj(the_proj)
-        size_limit = min(all_reqs.count(), max_size)
-        sortedReqs = []
-        for r in all_reqs.order_by('-indeg')[:size_limit]:
-            sortedReqs.append(json.dumps(model_to_dict(r)))
-        new_depends_txt = []
-        new_influences_txt = []
-        for d in new_deps:
-            if d.source in new_reqs:
-                new_influences_txt.append(d.destination.text)
-            else:
-                new_depends_txt.append(d.source.text)
-        new_issue_json = json.dumps(model_to_dict(new_issue))
-        res = {'successful': True, 'sortedReqs': sortedReqs, 'new_depends': new_depends_txt, 'new_influences': new_influences_txt,'new_issue':new_issue_json}
-    else:
-        res = {'successful': False}
+    res = {'successful': True,'new_issue':new_issue_json}
     return JsonResponse(res)
 
 def getAllReqsAndDeps(request):
@@ -218,19 +197,24 @@ def getAllReqsAndDeps(request):
         #this line should be changed for having multiple types
         the_type = DepType.objects.filter(proj=the_proj)[0]
         for d in DepIssue.objects.filter(dep_type=the_type):
-            tmp = {'source': str(d.id), 'destination': str(d.id)}
+            tmp = {'source': str(d.source.id), 'destination': str(d.destination.id)}
             ds.append(tmp)
     res = {'jreqs': iss, 'jdeps': ds}
     return JsonResponse(res)
 
+#gets the depent and depending issues of an issue by its id
 def getReqDeps(request):
-    req_id = request.GET.get('req_id', None)
-    the_req = Req.objects.get(pk=req_id)
-    inf_objs = Dep.objects.filter(source=the_req)
+    res = []
+    issue_id = request.GET.get('req_id', None)
+    try:
+        the_issue = Issue.objects.get(pk=issue_id)
+    except Issue.DoesNotExist:
+        res = None
+    inf_objs = DepIssue.objects.filter(source=the_issue)
     influencing = []
     for obj in inf_objs:
         influencing.append(obj.destination.text)
-    depending_objs = Dep.objects.filter(destination=the_req)
+    depending_objs = DepIssue.objects.filter(destination=the_issue)
     depending = []
     for obj in depending_objs:
         depending.append(obj.source.text)

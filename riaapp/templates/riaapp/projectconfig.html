@@ -13,6 +13,10 @@
 
 <script type="text/javascript">
 	$('#reset_btn').click(function(){
+		del = confirm("Are you sure you want to reset everything?");
+		if (del == false) {
+			return;
+		}
 		$.ajax({
 			url: '/riaapp/reset/',
 			data: {
@@ -30,8 +34,8 @@
 			}
 		});
 	});
-	</script>
-	{% endblock javascript %}
+</script>
+{% endblock javascript %}
 </body>
 
 </html>

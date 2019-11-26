@@ -98,9 +98,8 @@
       priority = $('#priority_dd').val();
       type = $('#issue_type_dd').val();
       effort = $('#effort_input').val();
-      if (addIssueFunction(txt, priority, type, effort, true)) {
-        $('#new_req_text').val("");  
-      }
+      addIssueFunction(txt, priority, type, effort, true);
+      $('#new_req_text').val("");  
       e.preventDefault();
     }
   });
@@ -109,9 +108,8 @@
     priority = $('#priority_dd').val();
     type = $('#issue_type_dd').val();
     effort = $('#effort_input').val();
-    if (addIssueFunction(txt, priority, type, effort, true)) {
-      $('#new_req_text').val("");  
-    }
+    addIssueFunction(txt, priority, type, effort, true);
+    $('#new_req_text').val("");
   });
 
 

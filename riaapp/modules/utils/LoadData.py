@@ -1,4 +1,4 @@
-from ...models import Req, NLPDoc, DepLearnInstance, Issue, Project, Dep, DepType
+from ...models import Req, NLPDoc, DepLearnInstance, Issue, Project, Dep, DepType, DepIssue
 from . import PreProcessing as pp
 from ..ml_modules import Feature_Extraction as fe
 
@@ -19,19 +19,30 @@ def getReqsByProj(the_proj):
 
 
 def getDepsByProj(the_proj):
-    print('here')
     if the_proj == None:
         return None
-    print(the_proj.id)
     res = None
     types = DepType.objects.filter(proj=the_proj)
-    print(types.count())
     first = True
     for t in types:
         if first:
             res = Dep.objects.filter(dep_type=t)
         else:
             res = res | Dep.objects.filter(dep_type=t)
+        first = False
+    return res
+
+def getDepIssuesByProj(the_proj):
+    if the_proj == None:
+        return None
+    res = None
+    types = DepType.objects.filter(proj=the_proj)
+    first = True
+    for t in types:
+        if first:
+            res = DepIssue.objects.filter(dep_type=t)
+        else:
+            res = res | DepIssue.objects.filter(dep_type=t)
         first = False
     return res
 
@@ -42,8 +53,12 @@ def emptyProj(the_proj):
             Req.objects.filter(issue=iss).delete()
             iss.delete()
 
-        Dep.objects.all().delete()
-        DepType.objects.all().delete()
+        dep_types = DepType.objects.filter(proj=the_proj)
+        for dt in dep_types:
+            DepIssue.objects.filter(dep_type=dt).delete()
+            Dep.objects.filter(dep_type=dt).delete()
+            dt.delete()
+
         return True
     except Exception as e:
         print(str(e))

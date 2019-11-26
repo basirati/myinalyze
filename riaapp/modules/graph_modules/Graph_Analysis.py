@@ -1,4 +1,4 @@
-from ...models import Req, Dep, DepType
+from ...models import Issue, DepIssue, DepType
 
 class ReqGraph(object):
     def __init__(self):
@@ -36,7 +36,7 @@ def calculateNodeDegrees(rgraph):
     min_val_out = 9999
     maxs_out = []
     mins_out = []
-    for r in Req.objects.all():
+    for r in Issue.objects.all():
         val_in = calNodeInDegree(r)
         val_out = calNodeOutDegree(r)
         #in degree max caclculation
@@ -99,11 +99,7 @@ def calNodeInDegree(r):
     return res
 
 def getDepsIn(r):
-    res = []
-    for d in Dep.objects.all():
-        if d.destination == r:
-            res.append(d)
-    return res
+    return DepIssue.objects.filter(destination=r)
 
 
 def calNodeOutDegree(r):
@@ -122,8 +118,4 @@ def calNodeOutDegree(r):
     return res
 
 def getDepsOut(r):
-    res = []
-    for d in Dep.objects.all():
-        if d.source == r:
-            res.append(d)
-    return res
+    return DepIssue.objects.filter(source=r)

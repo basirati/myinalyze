@@ -69,19 +69,35 @@ def emptyProj(the_proj):
 def loadReqs(doc, proj):
     try:
         if doc.name.endswith('csv'):
-            doc = importJiraCSV_byIssue(doc)
-        for line in doc:
-            if not(isinstance(line, str)):
-                line_txt = line.decode("utf-8")
-            else:
-                line_txt = line
-            #Inja bayad avaz she, alan line be line mirim jolo, vali kolan bayad issue by issue bashe, yani paragraph be paragraph
-            addIssue(line_txt, 1, 'Task', 5, proj)
+            print('csv here')
+            res = pp.importJiraCSV_byIssue_Complete(doc)
+            for issue_holder in res:
+                addIssueComplete(issue_holder, proj)
+        else:
+            print('not csv there')
+            for line in doc:
+                if not(isinstance(line, str)):
+                    line_txt = line.decode("utf-8")
+                else:
+                    line_txt = line
+                #Inja bayad avaz she, alan line be line mirim jolo, vali kolan bayad issue by issue bashe, yani paragraph be paragraph
+                addIssue(line_txt, 1, 'Task', 5, proj)
         return True
     except Exception as e:
         print(str(e))
         return False
     
+
+def addIssueComplete(issue_holder, proj):
+    issue = addIssue(issue_holder.text, issue_holder.priority, issue_holder.issue_type, issue_holder.effort, proj)
+    if issue == None:
+        return None
+    issue.title = issue_holder.title
+    issue.status = issue_holder.status
+    issue.creator = issue_holder.creator
+    issue.created_date = issue_holder.created_date
+    issue.save()
+    return issue
 
 def addIssue(txt, priority, itype, effort, proj):
     try:

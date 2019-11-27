@@ -1,0 +1,35 @@
+<div class="row" style="margin: 1% auto;">
+  <div class="table-responsive">
+    <table id="reqs_table" class="table align-items-center table-hover">
+      <thead class="thead-light">
+        <tr>
+          <th scope="col" style="cursor: auto;">Title</th>
+          <th scope="col" style="cursor: auto;">Description</th>
+          <th scope="col" style="cursor: auto;">Type</th>
+          <th scope="col" style="cursor: auto;">Priority</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for iss in Reqs %}
+        <tr>
+          <th hidden="true">
+            {{iss.id}}
+          </th>
+          <th >
+            {{iss.title}}
+          </th>
+          <th scope="row" style="word-wrap: break-word; word-break: break-all; white-space: normal;">
+            {{iss.text}}
+          </th>
+          <th>
+            {{iss.issue_type}}
+          </th>
+          <th>
+            {{iss.priority}}
+          </th>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>

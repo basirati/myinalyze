@@ -11,7 +11,7 @@ urlpatterns = [
     path('loadfile/sresults/', views.searchresults, name='searchresults'),
     path('loadfile/addload/', views.addreqspage, name='addreqspage'),
     path('loadfile/projconfig/', views.projconfig, name='projconfig'),
-    
+    path('loadfile/roadanalysis/', views.roadanalysis, name='roadanalysis'),
 	#re_path(r'^loadfile/analyze/$', views.analyze, name='analyze'),
     re_path(r'^getallreqsanddeps/$', views.getAllReqsAndDeps, name='getallreqsanddeps'),
     re_path(r'^getlp/$', views.getLP, name='getlp'),

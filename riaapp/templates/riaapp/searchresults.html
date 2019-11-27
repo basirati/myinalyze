@@ -16,16 +16,44 @@
         <thead class="thead-light">
           <tr>
             <th scope="col" style="cursor: auto;">Requirement</th>
+            <th scope="col" style="cursor: auto;">Description</th>
+            <th scope="col" style="cursor: auto;">Type</th>
+            <th scope="col" style="cursor: auto;">Priority</th>
+            <th scope="col" style="cursor: auto;">Effort</th>
+            <th scope="col" style="cursor: auto;">Status</th>
+            <th scope="col" style="cursor: auto;">Create Date</th>
+            <th scope="col" style="cursor: auto;">Creator</th>
           </tr>
         </thead>
         <tbody>
-          {% for r in res %}
+          {% for r in Reqs %}
           <tr>
             <td hidden="true">
               {{r.id}}
             </td>
+            <td class="clickable_req_cell" style="word-wrap: break-word; word-break: break-word; white-space: normal;">
+              {{r.title}}
+            </td>
             <td class="clickable_req_cell" style="word-wrap: break-word; word-break: break-all; white-space: normal;">
               {{r.text}}
+            </td>
+            <td class="clickable_req_cell">
+              {{r.issue_type}}
+            </td>
+            <td class="clickable_req_cell">
+              {{r.priority}}
+            </td>
+            <td class="clickable_req_cell">
+              {{r.effort}}
+            </td>
+            <td class="clickable_req_cell" style="word-break: break-word; white-space: normal;">
+              {{r.status}}
+            </td>
+            <td class="clickable_req_cell">
+              {{r.created_date}}
+            </td>
+            <td class="clickable_req_cell">
+              {{r.creator}}
             </td>
           </tr>
           {% endfor %}

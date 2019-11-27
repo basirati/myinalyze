@@ -1,46 +1,15 @@
 {% extends 'riaapp/admin_base.html' %}
 {% block content %}
 <div class="row" style="margin-top: 3% margin: 0 auto; white-space: nowrap;">
+  <!--
   {%include 'riaapp/AddBar.html' %}
   <a id="scrollgraph_btn" href="#graphviz" class="col col-lg-1 btn btn-outline-primary" style="text-align: center; white-space: normal; padding-right: 0; padding-left: 0;">Graph Visualization</a>
+  -->
 </div>
-<div class="row" style="margin: 1% auto;">
-  <div class="table-responsive">
-    <table id="reqs_table" class="table align-items-center table-hover">
-      <thead class="thead-light">
-        <tr>
-          <th scope="col" style="cursor: auto;">
-            Requirement Specification
-            <span style="margin-left: 2%;">
-              <a id="seeallreqs_btn" href="{% url 'riaapp:searchresults' %}" class="btn btn-sm btn-primary" >See All Requirements</a>
-              <a id="seealldeps_btn" href="{% url 'riaapp:depslist' %}" class="btn btn-sm btn-primary">See All Dependencies</a>  
-            </span>
-          </th>
-          <th scope="col">Depending On <br> (Number of Requirements)</th>
-          <th scope="col">Influencing On <br> (Number of Requirements)</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for iss in sortedReqs %}
-        <tr>
-          <th hidden="true">
-            {{iss.id}}
-          </th>
-          <th scope="row" style="word-wrap: break-word; word-break: break-all; white-space: normal;">
-            {{iss.text}}
-          </th>
-          <td>
-            {{iss.indeg}}
-          </td>
-          <td>
-            {{iss.outdeg}}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</div>
+
+
+
+{% include "riaapp/reqtable.html" %}
 {% include "riaapp/graph.html" %}
 {% endblock content %}
 
@@ -119,7 +88,7 @@
     $.get('/riaapp/getallreqsanddeps/', {}, function(data){
       nodes = [];
       for (var i = 0; i < data.jreqs.length; i++) {
-        nodes.push({name: JSON.parse(data.jreqs[i]).text, outdeg: JSON.parse(data.jreqs[i]).outdeg, id: JSON.parse(data.jreqs[i]).id});
+        nodes.push({name: JSON.parse(data.jreqs[i]).title, outdeg: JSON.parse(data.jreqs[i]).outdeg, id: JSON.parse(data.jreqs[i]).id});
       }
       links = [];
       for (var i = 0; i < data.jdeps.length; i++) {

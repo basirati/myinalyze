@@ -94,7 +94,7 @@ def analyze(request):
     #size_limit = min(Req.objects.all().count(), max_size)
     #sortedReqs = Req.objects.all().order_by('-indeg')[:size_limit]
     
-    response = {'sortedReqs': sortedReqs}
+    response = {'Reqs': sortedReqs}
     return render(request, 'riaapp/resadmin.html', response)
 
 
@@ -108,7 +108,7 @@ def searchresults(request):
         for term in search_terms:
             res = res.filter(text__icontains=term)
     
-    response = {'res': res}
+    response = {'Reqs': res}
     return render(request, 'riaapp/searchresults.html', response)
 
 
@@ -193,7 +193,9 @@ def getAllReqsAndDeps(request):
     if request.method == 'GET':
         the_proj = getProjbyID(request.session.get('proj_id'))
         for issue in Issue.objects.filter(proj=the_proj):
-            iss.append(json.dumps(model_to_dict(issue)))
+            issue_dic = model_to_dict(issue)
+            del issue_dic['created_date']
+            iss.append(json.dumps(issue_dic))
         #this line should be changed for having multiple types
         the_type = DepType.objects.filter(proj=the_proj)[0]
         for d in DepIssue.objects.filter(dep_type=the_type):
@@ -221,6 +223,11 @@ def getReqDeps(request):
     
     res = {'influencing': influencing, 'depending': depending}
     return JsonResponse(res)
+
+
+def roadanalysis(request):
+    return render(request, 'riaapp/roadanalysis.html', {})
+
 
 def getLP(request):
     mainG = REI_Graph_PathAnylsis.importReqsToGraph()

@@ -12,7 +12,8 @@ from .models import Req, Dep, DepType, DepLearnInstance, NLPDoc, Project, Issue,
 
 from .forms import DocumentForm, CreateProjForm
 from .modules.ml_modules.DependencyIdentifier import DependencyIdentifier
-from .modules.graph_modules import Graph_Analysis, REI_Graph_PathAnylsis
+from .modules.graph_modules import Graph_Analysis
+from .modules.graph_modules import REI_Graph_PathAnylsis as rga
 from .modules.utils import LoadData as ld
 
 dependency_name = 'relates'
@@ -63,17 +64,20 @@ def loadfile(request):
 
 def analyze(request):
     cpf = CreateProjForm(request.POST)
+    #new proj
     if cpf.is_valid():
         new_proj = Project.objects.create(name=cpf.cleaned_data['proj_name'], description=cpf.cleaned_data['proj_desc'])
         new_proj.save()
         request.session['proj_id'] = new_proj.id
     else:
         isFresh = request.GET.get('fresh')
+        #load proj
         if isFresh == None:
             proj_id = request.GET.get('id')
             if proj_id != None:
                 request.session['proj_id'] = int(proj_id)
         else:
+            print('bbbbbbbbbbbb')
             if isFresh == 'True':
                 request.session['proj_id'] = Project.objects.filter(name=temp_proj)[0].id
             elif isFresh == 'False':
@@ -88,7 +92,6 @@ def analyze(request):
             #mainG = REI_Graph_PathAnylsis.importReqsToGraph()
             #dag = REI_Graph_PathAnylsis.transformToDAG(mainG)
             #longest_path = REI_Graph_PathAnylsis.getLongestPath(dag)
-            
     the_proj = getProjbyID(request.session['proj_id'])
     sortedReqs = Issue.objects.filter(proj=the_proj)
     #size_limit = min(Req.objects.all().count(), max_size)
@@ -225,8 +228,45 @@ def getReqDeps(request):
     return JsonResponse(res)
 
 
+def packLongestPath(G):
+    dag = rga.transformToDAG(G)
+    l_path = rga.getLongestPath(dag)
+    l_path_nodes = []
+    for node in l_path:
+        issue_ids = node.split(',')
+        node_clean = []
+        for issue_id in issue_ids:
+            issue = Issue.objects.get(pk=issue_id)
+            node_clean.append(issue.title)
+        l_path_nodes.append(node_clean)
+
+    start_node = int(l_path[0].split(',')[0])
+    end_node = int(l_path[-1].split(',')[0])
+    return l_path_nodes, start_node, end_node
+
+def packVitalNodes(G, start, end):
+    paths = rga.getPaths(G, start, end)
+    bridges = rga.getBridges(G)
+    res = rga.getVitalNodesBetween(paths, bridges, start, end)
+    return res
+
 def roadanalysis(request):
-    return render(request, 'riaapp/roadanalysis.html', {})
+    the_proj = getProjbyID(request.session['proj_id'])
+    g = rga.importIssuesToGraph(the_proj)
+    longest_path, start, end = packLongestPath(g)
+    vital_nodes = packVitalNodes(g, start, end)
+    print(vital_nodes)
+    #now it is only for any node isolated, but not islands, we should change it
+    isolated_nodes_ids = rga.getIsolatedNodes(g)
+    isolated_nodes = []
+    for id_ in isolated_nodes_ids:
+        issue = Issue.objects.get(pk=id_)
+        isolated_nodes.append(issue)
+    #start = int(l_path[0].split(',')[0])
+    #end = int(l_path[-1].split(',')[0])
+    #res = rga.getPaths(g, start, end)
+    
+    return render(request, 'riaapp/roadanalysis.html', {'longest_path': longest_path, 'vital_nodes': vital_nodes, 'isolated_nodes': isolated_nodes})
 
 
 def getLP(request):
@@ -254,3 +294,15 @@ def deleteProj(request):
     ld.emptyProj(the_proj)
     the_proj.delete()
     return JsonResponse({'successful': True})
+
+
+def doGraph(request):
+    the_proj = getProjbyID(request.session['proj_id'])
+    g = rga.importIssuesToGraph(the_proj)
+    da_g = rga.transformToDAG(g)
+    l_path = rga.getLongestPath(da_g)
+    print(l_path)
+    start = int(l_path[0].split(',')[0])
+    end = int(l_path[-1].split(',')[0])
+    res = rga.getPaths(g, start, end)
+    return JsonResponse({'paths': res})

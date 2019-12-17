@@ -20,5 +20,6 @@ urlpatterns = [
     re_path(r'^addlearninstance/$', views.addLearnInstance, name='addlearninstance'),
     re_path(r'^getreqdeps/$', views.getReqDeps, name='getreqdeps'),
     re_path(r'^reset/$', views.resetAll, name='reset'),
-    re_path(r'^delproj/$', views.deleteProj, name='delproj')
+    re_path(r'^delproj/$', views.deleteProj, name='delproj'),
+    re_path(r'^dograph/$', views.doGraph, name='dograph')
 ]

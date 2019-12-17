@@ -1,0 +1,7 @@
+- which issues are the blockers?
+	- find the longest path
+	- find which one has the highest priority
+	- find which one has the highest effort
+	- calculate the progress based on status of the issues
+	- maybe show the priority with colour and effort with size
+	- find the undone reqs with the highest priorities and effort and created time

@@ -1,13 +1,84 @@
 {% extends 'riaapp/admin_base.html' %}
 {% block content %}
 
-<h1><strong>{{proj.name|default_if_none:"Test Project"}}</strong></h1>
+<div class="card">
+	<div class="card-header" style="font-weight: bold;">Longest Dependency Path</div>
+	<div class="card-body">
+		<h5 class="card-title">
+		{% for node_collapsed in longest_path %}
+				{
+			{% for node in node_collapsed %}
+				{{node}}
+				,
+			{% endfor %}
+				} -->
+		{% endfor %}
+		</h5>
+	</div>
+</div>
 
-asdasd
+<div class="card">
+	<div class="card-header" style="font-weight: bold;">Bottleneck Issues</div>
+	<div class="card-body">
+		<table class="table align-items-center">
+      		<thead class="thead-light">
+        		<tr>
+          			<th scope="col" style="cursor: auto;">Title</th>
+        		</tr>
+      		</thead>
+      		<tbody>
+        	{% for node in vital_nodes %}
+        	<tr>
+          		<th>{{node}}</th>
+        	</tr>
+        	{% endfor %}
+      		</tbody>
+    	</table>
+	</div>
+</div>
+
+<div class="card">
+	<div class="card-body">
+		<div class="card-header" style="font-weight: bold;">Isolated Issues</div>
+		<ul class="list-group list-group-flush">
+			{% for node in isolated_nodes %}
+			<li class="list-group-item">{{node.title}}</li>
+			{% endfor %}
+		</ul>
+	</div>
+</div>
+
+
+<div class="card">
+	<div class="card-header">
+		To reah to an issue, which parallel paths exist?
+	</div>
+	<div class="card-body">
+		<h5 class="card-title">Title</h5>
+		<p class="card-text">Text</p>
+		<a id="analyze_btn" class="btn btn-primary" style="color: white;">Analyze</a>
+	</div>
+</div>
+
+
+
 {% endblock content %}
 {% block javascript %}
 
 <script type="text/javascript">
+	$('#analyze_btn').click(function (e) {
+		$.ajax({
+			url: '/riaapp/dograph/',
+			data: {
+				'req': true
+			},
+			dataType: 'json',
+			success: function (data) {
+				alert(data.paths)
+			}
+		});
+	});
+
 </script>
 {% endblock javascript %}
 </body>

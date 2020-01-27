@@ -255,7 +255,6 @@ def roadanalysis(request):
     g = rga.importIssuesToGraph(the_proj)
     longest_path, start, end = packLongestPath(g)
     vital_nodes = packVitalNodes(g, start, end)
-    print(vital_nodes)
     #now it is only for any node isolated, but not islands, we should change it
     isolated_nodes_ids = rga.getIsolatedNodes(g)
     isolated_nodes = []
@@ -265,8 +264,8 @@ def roadanalysis(request):
     #start = int(l_path[0].split(',')[0])
     #end = int(l_path[-1].split(',')[0])
     #res = rga.getPaths(g, start, end)
-    
-    return render(request, 'riaapp/roadanalysis.html', {'longest_path': longest_path, 'vital_nodes': vital_nodes, 'isolated_nodes': isolated_nodes})
+    all_issues = Issue.objects.filter(proj=the_proj)
+    return render(request, 'riaapp/roadanalysis.html', {'longest_path': longest_path, 'vital_nodes': vital_nodes, 'isolated_nodes': isolated_nodes, 'nodes': all_issues})
 
 
 def getLP(request):
@@ -298,11 +297,13 @@ def deleteProj(request):
 
 def doGraph(request):
     the_proj = getProjbyID(request.session['proj_id'])
+    start = request.GET.get('start')
+    end = request.GET.get('end')
     g = rga.importIssuesToGraph(the_proj)
-    da_g = rga.transformToDAG(g)
-    l_path = rga.getLongestPath(da_g)
-    print(l_path)
-    start = int(l_path[0].split(',')[0])
-    end = int(l_path[-1].split(',')[0])
-    res = rga.getPaths(g, start, end)
+    #da_g = rga.transformToDAG(g)
+    #l_path = rga.getLongestPath(da_g)
+    #print(l_path)
+    #start = int(l_path[0].split(',')[0])
+    #end = int(l_path[-1].split(',')[0])
+    res = rga.getPaths(g, int(start), int(end))
     return JsonResponse({'paths': res})

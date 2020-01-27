@@ -2,61 +2,81 @@
 {% block content %}
 
 <div class="card">
-	<div class="card-header" style="font-weight: bold;">Longest Dependency Path</div>
-	<div class="card-body">
-		<h5 class="card-title">
-		{% for node_collapsed in longest_path %}
+	<a class="card-header" data-toggle="collapse" href="#ldp" aria-expanded="false" aria-controls="collapseExample" style="font-weight: bold;">Longest Dependency Path</a>
+	<div class="collapse" id="ldp">
+		<div class="card-body">
+			<h5 class="card-title">
+				{% for node_collapsed in longest_path %}
 				{
-			{% for node in node_collapsed %}
-				{{node}}
-				,
-			{% endfor %}
+					{% for node in node_collapsed %}
+					{{node}}
+					,
+					{% endfor %}
 				} -->
-		{% endfor %}
-		</h5>
+				{% endfor %}
+			</h5>
+		</div>
 	</div>
 </div>
 
 <div class="card">
-	<div class="card-header" style="font-weight: bold;">Bottleneck Issues</div>
-	<div class="card-body">
-		<table class="table align-items-center">
-      		<thead class="thead-light">
-        		<tr>
-          			<th scope="col" style="cursor: auto;">Title</th>
-        		</tr>
-      		</thead>
-      		<tbody>
-        	{% for node in vital_nodes %}
-        	<tr>
-          		<th>{{node}}</th>
-        	</tr>
-        	{% endfor %}
-      		</tbody>
-    	</table>
+	<a class="card-header" data-toggle="collapse" href="#bni" aria-expanded="false" aria-controls="collapseExample" style="font-weight: bold;">Bottleneck Issues</a>
+	<div class="collapse" id="bni">
+		<div class="card-body">
+			<table class="table align-items-center">
+				<thead class="thead-light">
+					<tr>
+						<th scope="col" style="cursor: auto;">Title</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for node in vital_nodes %}
+					<tr>
+						<th>{{node}}</th>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
 	</div>
 </div>
 
 <div class="card">
-	<div class="card-body">
-		<div class="card-header" style="font-weight: bold;">Isolated Issues</div>
-		<ul class="list-group list-group-flush">
-			{% for node in isolated_nodes %}
-			<li class="list-group-item">{{node.title}}</li>
-			{% endfor %}
-		</ul>
+	<a class="card-header" data-toggle="collapse" href="#ii" aria-expanded="false" aria-controls="collapseExample" style="font-weight: bold;">Isolated Issues</a>
+	<div class="collapse" id="ii">
+		<div class="card-body">
+			<ul class="list-group list-group-flush">
+				{% for node in isolated_nodes %}
+				<li class="list-group-item">{{node.title}}</li>
+				{% endfor %}
+			</ul>
+		</div>
 	</div>
 </div>
 
 
 <div class="card">
-	<div class="card-header">
-		To reah to an issue, which parallel paths exist?
-	</div>
-	<div class="card-body">
-		<h5 class="card-title">Title</h5>
-		<p class="card-text">Text</p>
-		<a id="analyze_btn" class="btn btn-primary" style="color: white;">Analyze</a>
+	<a class="card-header" data-toggle="collapse" href="#pp" aria-expanded="false" aria-controls="collapseExample" style="font-weight: bold;">
+		Analyzing Parralel Paths
+	</a>
+	<div class="collapse" id="pp">
+		<div class="card-body" id="pp_card">
+			<select id="start_node" class="btn btn-secondary dropdown-toggle" style="margin-bottom: 1%; margin-left: 0%;">
+				<option value="" disabled selected>Select a starting issue.</option>
+			 	{% for node in nodes %}
+			 	<option class="dropdown-item" value={{node.id}}>{{node.title}}</option>
+			 	{% endfor %}
+      		</select>
+      		<br>
+      		<select id="end_node" class="btn btn-secondary dropdown-toggle" style="margin-bottom: 2%; margin-left: 0%;">
+      			<option value="" disabled selected>Select a goal/destination issue.</option>
+			 	{% for node in nodes %}
+			 	<option class="dropdown-item" value={{node.id}}>{{node.title}}</option>
+			 	{% endfor %}
+      		</select>
+      		<br>
+			<a id="analyze_btn" class="btn btn-primary" style="color: white; margin-bottom: 2%;">Analyze</a>
+		</div>
 	</div>
 </div>
 
@@ -66,15 +86,51 @@
 {% block javascript %}
 
 <script type="text/javascript">
+	function getIssueTextByID(id) {
+		var res = "NotFound";
+		$("#start_node option").each(function()	{
+			if (id == $(this).val()) {
+				res = $(this).text();
+			}
+		});
+		return res;
+	}
+
 	$('#analyze_btn').click(function (e) {
 		$.ajax({
 			url: '/riaapp/dograph/',
 			data: {
-				'req': true
+				'start': $('#start_node').val(),
+				'end': $('#end_node').val()
 			},
 			dataType: 'json',
 			success: function (data) {
-				alert(data.paths)
+				$("p").remove(".pp_res");
+				if (data.paths.length < 1) {
+					var para = document.createElement("p");
+					para.className = "pp_res";
+					para.appendChild(document.createTextNode( "No paths found between the selected issues!"));
+					$('#pp_card').append(para);
+				} else {
+					for (var i=0; i<data.paths.length; i++) {
+						var para = document.createElement("p");
+						para.className = "pp_res";
+						//data.paths[i].toString()
+						res = ""
+						first = true;
+						for (n in data.paths[i]){
+							id = data.paths[i][n];
+							if (first) {
+								res = res + getIssueTextByID(id);
+								first = false;
+							} else {
+								res = res + ' --> ' + getIssueTextByID(id);	
+							}
+						}
+						para.appendChild(document.createTextNode(res));
+						$('#pp_card').append(para);
+					}
+				}
 			}
 		});
 	});

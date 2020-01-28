@@ -77,7 +77,6 @@ def analyze(request):
             if proj_id != None:
                 request.session['proj_id'] = int(proj_id)
         else:
-            print('bbbbbbbbbbbb')
             if isFresh == 'True':
                 request.session['proj_id'] = Project.objects.filter(name=temp_proj)[0].id
             elif isFresh == 'False':

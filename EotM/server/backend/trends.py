@@ -1,13 +1,17 @@
 
 
+
 class Trends:
 
-    def __init__(self, name, source, trendRanking):
+    def __init__(self, name, source, trendRanking=0):
         self.name = name
         self.source = source
         self.trendRanking = trendRanking
 
 class TrendsIdentifier:
+
+    trendsList = [Trends]
+
 
     def get_trends(url, ):
 
@@ -15,3 +19,8 @@ class TrendsIdentifier:
 
 
         return trendList
+
+
+# -*- coding: utf-8 -*-
+import scrapy
+

@@ -1,0 +1,1 @@
+# This file contains the settings you set for your project, you’ll be dealing a lot with it.

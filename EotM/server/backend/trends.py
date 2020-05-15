@@ -1,6 +1,5 @@
 
 
-
 class Trends:
 
     def __init__(self, name, source, trendRanking=0):
@@ -21,6 +20,4 @@ class TrendsIdentifier:
         return trendList
 
 
-# -*- coding: utf-8 -*-
-import scrapy
 

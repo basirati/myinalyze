@@ -8,7 +8,9 @@
 import scrapy
 
 
-class CrawlersItem(scrapy.Item):
+class ForresterItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
-    pass
+    trend = scrapy.Field()
+    url = scrapy.Field()
+    ranking = scrapy.Field()

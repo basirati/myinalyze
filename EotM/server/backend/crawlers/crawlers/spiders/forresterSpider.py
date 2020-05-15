@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
+from scrapy.selector import Selector
+from crawlers.items import ForresterItem
 
 
 class ForresterSpider(scrapy.Spider):
@@ -10,29 +12,23 @@ class ForresterSpider(scrapy.Spider):
     # List of URLs to be scraped
     start_urls = ['https://go.forrester.com/research/predictions/']
 
+
     def parse(self, response):
         # Extracting the content using css selectors
-        titles = response.css('h3::text').getall()
+        titles = response.xpath('//*[@id="main"]/section[2]/div/div/div/div[2]/div/h3/text()').extract()
 
+        #trends = {}
         # Give the extracted content row wise
-        for item in titles:
+        for title in titles:
             # create a dictionary to store the scraped info
-            scraped_info = {
-                'trend': item
-            }
-
+            item = {}
+            item['trend'] = title
+            item['url'] = 'https://go.forrester.com/research/predictions/'
+            item['source'] = 'Forrester'
+            item['ranking'] = 0
 
             # yield or give the scraped info to scrapy
-            yield scraped_info
+            yield item
 
 
-    # def parse_item(self, response):
-    #
-    #
-    #     item = scrapy.Item()
-    #
-    #     item['title'] = response.xpath('//h3::text').getall()
-    #     # for h3 in response.xpath('//h3').getall():
-    #     #     yield {"title": h3}
-    #     print(item)
-    #     return item
+

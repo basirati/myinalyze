@@ -1,4 +1,4 @@
-
+import datetime
 
 class Trends:
 
@@ -21,3 +21,4 @@ class TrendsIdentifier:
 
 
 
+print(str(datetime.date.today()))

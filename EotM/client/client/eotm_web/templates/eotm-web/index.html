@@ -1,0 +1,45 @@
+{% extends "eotm-web/base.html" %}
+{% block content %}
+
+<style>
+
+#intro{
+    width: 300px;
+    border: 2px solid #e7e7e7;
+    padding: 50px;
+    margin: 20px;
+    float: left;
+    width: 500px;
+    margin-top:30px;
+    background-color: #ffffff; color: #7d7d7d;
+    border-radius: 10px;
+    font-family: 'sans-serif';
+    box-shadow: 0 3px 6px 0 rgba(0,0,0,0.2), 0 4px 8px 0 rgba(0,0,0,0.19);
+
+}
+
+</style>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+
+<body>
+<div id="intro">
+    <p>
+        Eyes On The Market is designed to provide the Product Owner and the team with the current word on the market.
+        It first identifies the trending topics, then crawls the web and finds out how often each of those topics is discussed about.
+        Then it provides the Product Owner with bubbles, each representing a trending topic in real-time.
+        The size of the bubbles increases once the identified topic is being more popular and shrinks once the hype around the topic fades.
+        This helps the PO have a general idea about what the market is talking about.
+    </p>
+    <p>
+        Click the 'Trends' on the menu bar to view the current trends.
+    </p>
+</div>
+
+</body>
+
+</html>
+
+{% endblock %}

@@ -1,0 +1,177 @@
+{% extends "eotm-web/base.html" %}
+{% block content %}
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style type="text/css">
+        .trend_text{
+            stroke: #ffffff;
+           stroke-width: 2px;
+        }
+        #status{
+            float: right;
+            margin-right: 200px;
+            margin-top:30px;
+            background-color: #ffffff; color: black;
+            border-radius: 12px;
+            border: 2px solid #e7e7e7;
+            font-family: 'sans-serif';
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.2), 0 1px 2px 0 rgba(0,0,0,0.19);
+            color: #c2c2c2;
+            cursor: not-allowed;
+
+        }
+    </style>
+
+</head>
+
+<body>
+<div>
+
+    {% for key, value in trends_list.items %}
+    <div hidden="true">
+        <!--<button type="button" class="round-button" id= "button{{forloop.counter}}">x </button> <div class="bubble_value" id='gravity' hidden="true">{{value}}</div>-->
+        <div class="keys" hidden="true">{{key}} </div>
+        <div class="bubble_value" hidden="true">{{value}}</div>
+
+    </div>
+    {% endfor %}
+    <div>
+        <button type='button' id='status'>offline</button>
+    </div>
+    <!-- <div>
+        <svg height='100' width='100'>
+        <g>
+        <circle cx='50' cy='50' r='33'>
+            
+        </circle>
+        <text stroke='orange' x='50' y='50' dy='.35em' text-anchor='middle'> I am a circle!</text>
+    </g>
+        </svg>
+    </div> -->
+    <div id="chart" top='50px'></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.2/d3.min.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+    
+    <script> (function () {
+        var get_sizes = document.getElementsByClassName('bubble_value');
+            console.log(get_sizes)
+            console.log('---------')
+        var get_keys = document.getElementsByClassName('keys');
+
+        var circle_radius=[];
+            var keys = [];
+            var i;
+            for (i=0; i < get_sizes.length; i++){
+
+                circle_radius[i]= parseFloat(get_sizes[i].textContent);
+                keys[i] = get_keys[i].textContent
+            }
+            console.log(circle_radius);
+            console.log(keys);
+
+        var keys_radius = []
+
+        var t;
+        keys_radius[0]=['trend', 'index']
+        for(t=1; t<keys.length+1;t++){
+
+            keys_radius[t]=[keys[t-1], circle_radius[t-1]]
+        }
+        let csvKeysRadius = "data:text/csv;charset=utf-8," 
+            + keys_radius.map(e => e.join(",")).join("\n");
+
+        console.log(csvKeysRadius)
+
+        var width=1000, height=2000;
+        
+
+        var simulation = d3.forceSimulation()
+            .force('x', d3.forceX(width/2).strength(0.05))
+            .force('y', d3.forceY(height/2-500).strength(0.05))
+            .force('collide', d3.forceCollide(function(d){return d.index+75}));
+
+
+        var svg = d3.select('#chart')
+            .append('svg')
+            .attr('height', height)
+            .attr('width', width)
+            .append('g')
+            .attr('transform', 'translate(0,0)');
+
+
+
+        var radiusScale = d3.scaleSqrt().domain([0,100]).range([20,110]);
+
+        d3.queue()
+        .defer(d3.csv, csvKeysRadius)
+        .await(ready)
+
+        function ready(error, datapoints){
+
+
+        var myColor = d3.scaleOrdinal().range(d3.schemeTableau10);
+
+        var g = svg.selectAll(".trends")
+            .data(datapoints)
+            .enter().append('g')
+            .append('a').attr('xlink:href', function(d){
+                return "{% url 'trend' trend=12345 %}".replace(/12345/, d.trend.trim())})
+    
+        var circles = g.append('circle')
+                        .attr('class', 'trends')
+                        .attr('r', function(d){return radiusScale(d.index)})
+                        .attr('fill', function(d, i){return myColor(i)})
+                        
+                        
+
+        var text = g.append('text')
+                    .attr('fill', 'white')
+                    .text(function(d){return d.trend})
+                    .attr('text-anchor', 'middle')
+                    .style('font-size', '1px')
+                    .attr('dominant-baseline','central')
+                    .style("font-size", function(d) {return Math.min(this.parentNode.getBBox().width/this.getBBox().width, this.parentNode.getBBox().height/this.getBBox().height) + 'px'; })
+                    .attr('font-family', 'serif');
+        
+    
+
+
+        simulation.nodes(datapoints)
+            .on('tick', ticked)
+
+        
+
+        function ticked(){
+            circles
+                .attr('cx', function(d){
+                    return d.x
+                })
+                .attr('cy', function(d){
+                    return d.y
+                })
+            text.attr('x', function(d){
+                    return d.x
+                })
+                .attr('y', function(d){
+                    return d.y
+                })
+
+                
+        }}
+
+
+    })();
+    </script>
+    
+
+
+</div>
+
+</body>
+
+</html>
+
+{% endblock %}

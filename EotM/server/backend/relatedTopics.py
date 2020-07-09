@@ -17,7 +17,7 @@ class RelatedTopics():
         trends.append(item['trend'])
 
 
-    print(trends)
+
 
     S = requests.Session()
     URL = "https://en.wikipedia.org/w/api.php"
@@ -70,15 +70,35 @@ class RelatedTopics():
     def initiateSearch(self):
 
         for ubertrend in self.trends:
-            url = list(googlesearch.search(query=ubertrend + ' wikipedia', lang='en', num=1, stop=1, tld='com'))[0]
+
+            if ubertrend=='New Tech':
+                # Hardcoded this one
+                url = 'https://en.wikipedia.org/wiki/List_of_emerging_technologies'
+
+            else:
+                url = list(
+                    googlesearch.search(query='+'.join(ubertrend.split()) + '+wikipedia', lang='en', num=1, stop=1,
+                                        tld='com'))[0]
+
             title = url.split('/')[-1]
             related_keywords = self.get_relevant_topics(title=title)
+            print(related_keywords)
+
             if 'related topics' in DBInterface.find_one('ubertrends', {'trend': ubertrend}):
                 print('related topics already exist.')
                 pass
             else:
-                print('found the related topics to trend '+ ubertrend + ', now writing the results to DB')
-                DBInterface.update_one('ubertrends', {'trend': ubertrend}, {'related_topics': related_keywords})
+                print('found the related topics of trend '+ ubertrend + ', now writing the results to DB')
+
+                if not related_keywords:
+                    DBInterface.update_one('ubertrends', {'trend': ubertrend}, {'related_topics': ''})
+
+                else:
+                    for topic in related_keywords:
+                        if topic:
+                            DBInterface.update_one('ubertrends', {'trend': ubertrend}, {'related_topics.'+topic: {}})
+                        else:
+                            DBInterface.update_one('ubertrends', {'trend': ubertrend}, {'related_topics': ''})
 
         print('done writing the related topics!')
 

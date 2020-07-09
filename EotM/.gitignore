@@ -2,3 +2,8 @@
 server/node/node_modules/
 server/data/
 server/mongo/
+server/backend/secret.yaml
+server/backend/secrets-google.yaml
+server/shellCommands
+client/eotm-bot
+api/

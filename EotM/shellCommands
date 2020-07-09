@@ -1,0 +1,16 @@
+#MongoDB
+to change the dpath, so that we can run the mongo server
+mongod --dbpath=/Users/vaheh/Downloads/Thesis/myinalyze/EotM/server/data/db
+
+to run the mongo server
+mongo
+
+#git
+git add .
+git commit -m ''
+git push origin EotM
+
+# for importing packages in python3, path to root
+import sys
+sys.path.append('/Users/vaheh/Downloads/Thesis/myinalyze/EotM/server/backend/')
+

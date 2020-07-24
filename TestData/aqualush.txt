@@ -1,0 +1,5 @@
+Users must be able to set the mode.
+The current time consists of the current day and the current time of day.
+AquaLush must allow users to set the current time.
+AquaLush must either not allow an invalid time setting or validate the new time setting.
+AquaLush must allow users to set the current time.

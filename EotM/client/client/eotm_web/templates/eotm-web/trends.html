@@ -5,9 +5,17 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <style type="text/css">
-        .trend_text{
-            stroke: #ffffff;
-           stroke-width: 2px;
+        #titleText{
+            margin: auto;
+            text-align: center;
+            top:50%;
+            background-color: #ffffff; color: black;
+            width:500px;
+            font-family: 'sans-serif';
+            color: #7d7d7d;
+            font-size: 23px;
+            z-index: 5;
+
         }
         #status{
             float: right;
@@ -20,8 +28,14 @@
             box-shadow: 0 1px 2px 0 rgba(0,0,0,0.2), 0 1px 2px 0 rgba(0,0,0,0.19);
             color: #c2c2c2;
             cursor: not-allowed;
-
+            z-index:10;
         }
+
+        svg {
+            z-index: 0;
+            margin: auto;
+        }
+
     </style>
 
 </head>
@@ -40,6 +54,9 @@
     <div>
         <button type='button' id='status'>offline</button>
     </div>
+    <div id="titleText">
+        People are currently talking about these trends
+    </div>
     <!-- <div>
         <svg height='100' width='100'>
         <g>
@@ -50,7 +67,7 @@
     </g>
         </svg>
     </div> -->
-    <div id="chart" top='50px'></div>
+    <div id="chart"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.2/d3.min.js"></script>
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
@@ -85,16 +102,17 @@
 
         console.log(csvKeysRadius)
 
-        var width=1000, height=2000;
+        var width=2000, height=2900;
         
 
         var simulation = d3.forceSimulation()
-            .force('x', d3.forceX(width/2).strength(0.05))
-            .force('y', d3.forceY(height/2-500).strength(0.05))
+            .force('x', d3.forceX(width/2-250).strength(0.05))
+            .force('y', d3.forceY(height/2-1000).strength(0.05))
             .force('collide', d3.forceCollide(function(d){return d.index+75}));
 
 
         var svg = d3.select('#chart')
+            .attr('margin', 'auto')
             .append('svg')
             .attr('height', height)
             .attr('width', width)
@@ -103,7 +121,7 @@
 
 
 
-        var radiusScale = d3.scaleSqrt().domain([0,100]).range([20,110]);
+        var radiusScale = d3.scaleSqrt().domain([0,100]).range([30,120]);
 
         d3.queue()
         .defer(d3.csv, csvKeysRadius)
@@ -135,7 +153,9 @@
                     .attr('dominant-baseline','central')
                     .style("font-size", function(d) {return Math.min(this.parentNode.getBBox().width/this.getBBox().width, this.parentNode.getBBox().height/this.getBBox().height) + 'px'; })
                     .attr('font-family', 'serif');
-        
+
+        var title = g.append('title').text(function(d){return d.trend})
+
     
 
 

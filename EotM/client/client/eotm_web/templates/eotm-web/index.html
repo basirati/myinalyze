@@ -4,7 +4,6 @@
 <style>
 
 #intro{
-    width: 300px;
     border: 2px solid #e7e7e7;
     padding: 50px;
     margin: 20px;
@@ -28,13 +27,16 @@
 <div id="intro">
     <p>
         Eyes On The Market is designed to provide the Product Owner and the team with the current word on the market.
-        It first identifies the trending topics, then crawls the web and finds out how often each of those topics is discussed about.
-        Then it provides the Product Owner with bubbles, each representing a trending topic in real-time.
+        First it identifies the yearly trends specified by market researchers, then crawls different sources such as Twitter, TechCrunch, and Google Index,
+        and finds out how often each of those topics is discussed about on the market.
+        After aggregating the result from different sources, it visualizes the insights using bubbles.
+        Each bubble represents a trending topic in real-time.
         The size of the bubbles increases once the identified topic is being more popular and shrinks once the hype around the topic fades.
-        This helps the PO have a general idea about what the market is talking about.
+        This helps the Product Owner have a general idea about what the market is talking about, and use the insights in sprint planning,
+        backlog prioritization and strategy setting.
     </p>
     <p>
-        Click the 'Trends' on the menu bar to view the current trends.
+        Click the <a href="{% url 'web-view' %}">Trends</a> on the menu bar to view the current trends.
     </p>
 </div>
 

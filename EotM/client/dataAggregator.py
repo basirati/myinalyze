@@ -63,7 +63,7 @@ class DataAggregator:
             #print(trend_indexed)
             trends_indexed.append(trend_indexed.copy())
 
-        print(trends_indexed)
+        #print(trends_indexed)
         return trends_indexed
 
 
@@ -89,7 +89,7 @@ class DataAggregator:
 
 
         for ubertrend in self.ubertrends:
-            print(ubertrend)
+            #print(ubertrend)
 
             if float(ubertrend['twitter'][date]) > twitter_max_ubertrend:
                 twitter_max_ubertrend = float(ubertrend['twitter'][date])
